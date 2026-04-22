@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAMB MAX — Ultimate JAMB CBT Prep</title>
+    <meta name="description" content="Offline-first JAMB CBT preparation app with AI tutoring, past questions, and real exam simulation.">
+    <meta name="theme-color" content="#0a192f">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --navy: #0a192f;
+            --navy-light: #112240;
+            --navy-lighter: #233554;
+            --gold: #ffd700;
+            --gold-dim: #b8941f;
+            --white: #e6f1ff;
+            --gray: #8892b0;
+            --green: #64ffda;
+            --red: #ff5555;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--navy);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 25, 47, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--navy-lighter);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo span { color: var(--white); }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--gray);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover { color: var(--gold); }
+        
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: var(--gold);
+            color: var(--navy);
+        }
+        
+        .btn-primary:hover {
+            background: #ffed4e;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+        }
+        
+        .btn-outline:hover {
+            background: rgba(255, 215, 0, 0.1);
+        }
+        
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 8rem 5% 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255,215,0,0.03) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            z-index: 1;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(100, 255, 218, 0.1);
+            color: var(--green);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+        }
+        
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+        }
+        
+        .hero h1 .highlight {
+            color: var(--gold);
+            position: relative;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .hero-stats {
+            display: flex;
+            gap: 3rem;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--navy-lighter);
+        }
+        
+        .stat h3 {
+            font-size: 2rem;
+            color: var(--gold);
+            font-weight: 800;
+        }
+        
+        .stat p {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin: 0;
+        }
+        
+        .hero-visual {
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 500px;
+            height: 500px;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        
+        .hero-visual svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Features */
+        .features {
+            padding: 6rem 5%;
+            background: var(--navy-light);
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .section-header p {
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .feature-card {
+            background: var(--navy);
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--navy-lighter);
+            transition: all 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold-dim);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-card h3 {
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+        
+        .feature-card p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 6rem 5%;
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .step {
+            text-align: center;
+            position: relative;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--gold);
+            color: var(--navy);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .step h3 { margin-bottom: 0.5rem; }
+        .step p { color: var(--gray); }
+        
+        /* Pricing */
+        .pricing {
+            padding: 6rem 5%;
+            background: var(--navy-light);
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: var(--navy);
+            border-radius: 16px;
+            padding: 2.5rem;
+            border: 1px solid var(--navy-lighter);
+            position: relative;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold);
+            color: var(--navy);
+            padding: 0.3rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
+        .pricing-card h3 { margin-bottom: 0.5rem; }
+        .price {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--gold);
+            margin: 1rem 0;
+        }
+        
+        .price span {
+            font-size: 1rem;
+            color: var(--gray);
+            font-weight: 400;
+        }
+        
+        .pricing-card ul {
+            list-style: none;
+            margin: 2rem 0;
+        }
+        
+        .pricing-card li {
+            padding: 0.5rem 0;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .pricing-card li::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: bold;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 3rem 5%;
+            text-align: center;
+            border-top: 1px solid var(--navy-lighter);
+            color: var(--gray);
+        }
+        
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+        
+        /* Auth Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 25, 47, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal-overlay.active { display: flex; }
+        
+        .modal {
+            background: var(--navy-light);
+            padding: 2.5rem;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid var(--navy-lighter);
+            position: relative;
+        }
+        
+        .modal h2 {
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        
+        .modal-subtitle {
+            text-align: center;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: var(--navy);
+            border: 1px solid var(--navy-lighter);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        
+        .google-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--white);
+            color: var(--navy);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+        
+        .google-btn:hover { transform: translateY(-2px); }
+        
+        .divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+            color: var(--gray);
+            font-size: 0.85rem;
+        }
+        
+        .divider::before, .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background: var(--navy-lighter);
+        }
+        
+        .divider::before { left: 0; }
+        .divider::after { right: 0; }
+        
+        .btn-full { width: 100%; }
+        
+        .modal-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .modal-footer a {
+            color: var(--gold);
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .mobile-menu-btn { display: block; }
+            .hero { padding-top: 6rem; }
+            .hero-visual { display: none; }
+            .hero-stats { gap: 1.5rem; }
+            .pricing-card.featured { transform: none; }
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            background: var(--navy-light);
+            border: 1px solid var(--navy-lighter);
+            border-radius: 8px;
+            color: var(--white);
+            z-index: 3000;
+            transform: translateX(400px);
+            transition: transform 0.3s;
+            max-width: 350px;
+        }
+        
+        .toast.show { transform: translateX(0); }
+        .toast.success { border-left: 4px solid var(--green); }
+        .toast.error { border-left: 4px solid var(--red); }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="logo">JAMB <span>MAX</span></a>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How It Works</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><button class="btn btn-outline" onclick="openAuthModal('login')">Log In</button></li>
+            <li><button class="btn btn-primary" onclick="openAuthModal('signup')">Get Started</button></li>
+        </ul>
+        <button class="mobile-menu-btn">☰</button>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-visual">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#FFD700" d="M44.7,-76.4C58.9,-69.2,71.8,-59.1,81.6,-46.6C91.4,-34.1,98.1,-19.2,95.8,-5.3C93.5,8.6,82.2,21.5,71.1,32.6C60,43.7,49.1,53,37.2,60.6C25.3,68.2,12.4,74.1,-0.8,75.4C-14,76.7,-27.6,73.4,-39.9,66.3C-52.2,59.2,-63.2,48.3,-71.3,35.4C-79.4,22.5,-84.6,7.6,-82.6,-6.2C-80.6,-20,-71.4,-32.7,-60.8,-42.8C-50.2,-52.9,-38.2,-60.4,-25.8,-68.6C-13.4,-76.8,-0.6,-85.7,12.2,-86.5C25,-87.3,37.8,-79.9,44.7,-76.4Z" transform="translate(100 100)" />
+            </svg>
+        </div>
+        <div class="hero-content animate-in">
+            <div class="hero-badge">🇳🇬 Trusted by 10,000+ Nigerian Students</div>
+            <h1>Crush Your <span class="highlight">JAMB</span> With AI-Powered CBT Prep</h1>
+            <p>Practice with real past questions, simulate the actual CBT exam, get AI tutoring, and track your progress — all offline.</p>
+            <div class="hero-buttons">
+                <a href="dashboard.html" class="btn btn-primary">Start Practicing Free</a>
+                <button class="btn btn-outline" onclick="openAuthModal('signup')">Create Account</button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <h3>15K+</h3>
+                    <p>Questions</p>
+                </div>
+                <div class="stat">
+                    <h3>10+</h3>
+                    <p>Years</p>
+                </div>
+                <div class="stat">
+                    <h3>50K+</h3>
+                    <p>Students</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="section-header">
+            <h2>Everything You Need to <span style="color: var(--gold);">Score 300+</span></h2>
+            <p>Built specifically for JAMB UTME candidates. Study smarter, not harder.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">📝</div>
+                <h3>Real CBT Simulation</h3>
+                <p>Experience the exact JAMB CBT interface with a 2-hour timer, navigation panel, and auto-submit.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>15,000+ Past Questions</h3>
+                <p>Access questions from 2010-2024 organized by subject, topic, and year with detailed explanations.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI Tutor</h3>
+                <p>Get instant explanations, generate custom quizzes, and ask questions to our AI study companion.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Smart Analytics</h3>
+                <p>Track accuracy per subject, identify weak areas, and monitor your improvement over time.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>Gamification</h3>
+                <p>Earn XP, level up, maintain daily streaks, and unlock badges as you study.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✈️</div>
+                <h3>Works Offline</h3>
+                <p>Download everything and study without internet. Sync your progress when you're back online.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works" id="how-it-works">
+        <div class="section-header">
+            <h2>How It <span style="color: var(--gold);">Works</span></h2>
+            <p>Get started in less than 2 minutes</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Download the App</h3>
+                <p>Install JAMB MAX as a PWA on your Android phone. Works offline immediately.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Pick Your Subjects</h3>
+                <p>Select your 4 JAMB subjects and start practicing with past questions or take a mock exam.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Study & Improve</h3>
+                <p>Use AI tutoring, track your weak areas, and watch your scores climb with data-driven insights.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="section-header">
+            <h2>Simple <span style="color: var(--gold);">Pricing</span></h2>
+            <p>Start free, upgrade when you're ready to dominate</p>
+        </div>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Free</h3>
+                <div class="price">₦0<span>/forever</span></div>
+                <ul>
+                    <li>3 years of past questions</li>
+                    <li>5 mock exams per month</li>
+                    <li>Basic analytics</li>
+                    <li>Offline access</li>
+                    <li>Community support</li>
+                </ul>
+                <button class="btn btn-outline btn-full" onclick="openAuthModal('signup')">Get Started</button>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Premium</h3>
+                <div class="price">₦3,000<span>/month</span></div>
+                <ul>
+                    <li>All 15+ years of questions</li>
+                    <li>Unlimited mock exams</li>
+                    <li>AI Tutor (GPT-4 powered)</li>
+                    <li>Advanced analytics & weak spots</li>
+                    <li>Priority support</li>
+                    <li>Flashcards & study planner</li>
+                </ul>
+                <button class="btn btn-primary btn-full" onclick="openAuthModal('signup')">Go Premium</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">JAMB MAX</div>
+        <p>Built for Nigerian students, by Nigerian developers. Not affiliated with JAMB.</p>
+        <p style="margin-top: 1rem; font-size: 0.85rem;">&copy; 2026 JAMB MAX. All rights reserved.</p>
+    </footer>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal">
+            <button class="close-modal" onclick="closeAuthModal()">×</button>
+            <h2 id="modalTitle">Welcome Back</h2>
+            <p class="modal-subtitle" id="modalSubtitle">Sign in to sync your progress</p>
+            
+            <button class="google-btn" onclick="googleSignIn()">
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                    <path fill="#34A853" d="M9.003 18c2.43 0 4.467-.806 5.956-2.18l-2.909-2.259c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.504 18 9.003 18z"/>
+                    <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
+                    <path fill="#EA4335" d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.428 0 9.003 0 5.504 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z"/>
+                </svg>
+                Continue with Google
+            </button>
+            
+            <div class="divider">or</div>
+            
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-group" id="nameGroup" style="display: none;">
+                    <label>Full Name</label>
+                    <input type="text" id="fullName" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full" id="authBtn">Sign In</button>
+            </form>
+            
+            <div class="modal-footer">
+                <span id="authToggleText">Don't have an account?</span>
+                <a onclick="toggleAuthMode()" id="authToggleLink">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Firebase Config - Replace with your own
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "your-project.firebaseapp.com",
+            projectId: "your-project-id",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "your-app-id"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        let authMode = 'login';
+        
+        function openAuthModal(mode) {
+            authMode = mode;
+            const modal = document.getElementById('authModal');
+            const title = document.getElementById('modalTitle');
+            const subtitle = document.getElementById('modalSubtitle');
+            const nameGroup = document.getElementById('nameGroup');
+            const authBtn = document.getElementById('authBtn');
+            const toggleText = document.getElementById('authToggleText');
+            const toggleLink = document.getElementById('authToggleLink');
+            
+            if (mode === 'signup') {
+                title.textContent = 'Create Account';
+                subtitle.textContent = 'Start your JAMB journey';
+                nameGroup.style.display = 'block';
+                authBtn.textContent = 'Sign Up';
+                toggleText.textContent = 'Already have an account?';
+                toggleLink.textContent = 'Sign In';
+            } else {
+                title.textContent = 'Welcome Back';
+                subtitle.textContent = 'Sign in to sync your progress';
+                nameGroup.style.display = 'none';
+                authBtn.textContent = 'Sign In';
+                toggleText.textContent = "Don't have an account?";
+                toggleLink.textContent = 'Sign Up';
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.remove('active');
+        }
+        
+        function toggleAuthMode() {
+            openAuthModal(authMode === 'login' ? 'signup' : 'login');
+        }
+        
+        function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('fullName').value;
+            
+            if (authMode === 'signup') {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((cred) => {
+                        return cred.user.updateProfile({ displayName: name });
+                    })
+                    .then(() => {
+                        showToast('Account created! Redirecting...', 'success');
+                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                    })
+                    .catch(err => showToast(err.message, 'error'));
+            } else {
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => {
+                        showToast('Welcome back!', 'success');
+                        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                    })
+                    .catch(err => showToast(err.message, 'error'));
+            }
+        }
+        
+        function googleSignIn() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(() => {
+                    showToast('Signed in with Google!', 'success');
+                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                })
+                .catch(err => showToast(err.message, 'error'));
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+        
+        // Close modal on outside click
+        document.getElementById('authModal').addEventListener('click', (e) => {
+            if (e.target.id === 'authModal') closeAuthModal();
+        });
+        
+        // Check auth state
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // User is signed in - could update UI
+            }
+        });
+        
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW error:', err));
+        }
+    </script>
+</body>
+</html>
