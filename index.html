@@ -800,7 +800,7 @@
         let authMode = 'login';
         
         function openAuthModal(mode) {
-            authMode = mode;
+            authMode = mode;    
             const modal = document.getElementById('authModal');
             const title = document.getElementById('modalTitle');
             const subtitle = document.getElementById('modalSubtitle');
@@ -836,31 +836,58 @@
             openAuthModal(authMode === 'login' ? 'signup' : 'login');
         }
         
-        function handleAuth(e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const name = document.getElementById('fullName').value;
-            
-            if (authMode === 'signup') {
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then((cred) => {
-                        return cred.user.updateProfile({ displayName: name });
-                    })
-                    .then(() => {
-                        showToast('Account created! Redirecting...', 'success');
-                        setTimeout(() => window.location.href = 'dashboard.html', 1500);
-                    })
-                    .catch(err => showToast(err.message, 'error'));
-            } else {
-                auth.signInWithEmailAndPassword(email, password)
-                    .then(() => {
-                        showToast('Welcome back!', 'success');
-                        setTimeout(() => window.location.href = 'dashboard.html', 1000);
-                    })
-                    .catch(err => showToast(err.message, 'error'));
-            }
+       function handleAuth(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const name = document.getElementById('fullName').value;
+    
+    if (authMode === 'signup') {
+        // Validate name is provided
+        if (!name || name.trim() === '') {
+            showToast('Please enter your full name', 'error');
+            return;
         }
+        
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                // Update profile with display name
+                return userCredential.user.updateProfile({
+                    displayName: name.trim()
+                });
+            })
+            .then(() => {
+                // Create user document in Firestore
+                return db.collection('users').doc(auth.currentUser.uid).set({
+                    name: name.trim(),
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    subjects: [],
+                    subscription: 'free',
+                    xp: 0,
+                    streak: 0
+                });
+            })
+            .then(() => {
+                showToast('Account created! Redirecting...', 'success');
+                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+            })
+            .catch(err => {
+                console.error('Signup error:', err);
+                showToast(err.message, 'error');
+            });
+    } else {
+        auth.signInWithEmailAndPassword(email, password)
+            .then(() => {
+                showToast('Welcome back!', 'success');
+                setTimeout(() => window.location.href = 'dashboard.html', 1000);
+            })
+            .catch(err => {
+                console.error('Login error:', err);
+                showToast(err.message, 'error');
+            });
+    }
+}
         
         function googleSignIn() {
             const provider = new firebase.auth.GoogleAuthProvider();
