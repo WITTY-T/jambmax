@@ -316,12 +316,8 @@ if (page === 'flashcards') flashcards.render();
     },
     
     upgrade() {
-        // Flutterwave/Paystack integration placeholder
-        upgrade() {
     payment.showPricingModal();
-}
-        app.showToast('Payment integration coming soon! Contact support.', 'success');
-    },
+},
     
     showToast(message, type = 'success') {
         const toast = document.getElementById('toast');

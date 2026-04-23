@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - JAMB MAX</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-grid { display: grid; grid-template-columns: 250px 1fr; gap: 2rem; }
+        .admin-sidebar { background: var(--navy-light); padding: 1.5rem; border-radius: 12px; }
+        .admin-nav { list-style: none; }
+        .admin-nav li { padding: 0.8rem; cursor: pointer; border-radius: 6px; transition: all 0.3s; }
+        .admin-nav li:hover, .admin-nav li.active { background: rgba(255,215,0,0.1); color: var(--gold); }
+        .stat-box { background: var(--navy-light); padding: 1.5rem; border-radius: 8px; text-align: center; }
+        .stat-box h3 { color: var(--gold); font-size: 2rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid var(--navy-lighter); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="admin-grid" style="padding: 2rem;">
+        <aside class="admin-sidebar">
+            <h2 style="margin-bottom: 1.5rem;">Admin Panel</h2>
+            <ul class="admin-nav">
+                <li class="active" onclick="showTab('dashboard')">Dashboard</li>
+                <li onclick="showTab('questions')">Questions</li>
+                <li onclick="showTab('users')">Users</li>
+                <li onclick="showTab('analytics')">Analytics</li>
+            </ul>
+        </aside>
+        
+        <main>
+            <div id="tab-dashboard">
+                <h1>Overview</h1>
+                <div class="stats-grid" style="margin-top: 2rem;">
+                    <div class="stat-box">
+                        <div>Total Questions</div>
+                        <h3 id="adminTotalQs">0</h3>
+                    </div>
+                    <div class="stat-box">
+                        <div>Total Users</div>
+                        <h3 id="adminTotalUsers">0</h3>
+                    </div>
+                    <div class="stat-box">
+                        <div>Exams Today</div>
+                        <h3 id="adminExamsToday">0</h3>
+                    </div>
+                    <div class="stat-box">
+                        <div>Premium Users</div>
+                        <h3 id="adminPremiumUsers">0</h3>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tab-questions" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h1>Manage Questions</h1>
+                    <button class="btn btn-primary" onclick="showAddQuestion()">+ Add Question</button>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Subject</th>
+                                <th>Topic</th>
+                                <th>Year</th>
+                                <th>Question</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questionsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="tab-users" style="display: none;">
+                <h1>Users</h1>
+                <div class="card" style="margin-top: 1.5rem;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Level</th>
+                                <th>XP</th>
+                                <th>Premium</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Simple admin auth check
+        const adminEmails = ['admin@jambmax.com']; // Add your admin emails
+        
+        firebase.auth().onAuthStateChanged(user => {
+            if (!user || !adminEmails.includes(user.email)) {
+                window.location.href = 'index.html';
+            } else {
+                loadDashboard();
+            }
+        });
+        
+        function showTab(tab) {
+            document.querySelectorAll('.admin-nav li').forEach(li => li.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            ['dashboard', 'questions', 'users', 'analytics'].forEach(t => {
+                document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+            });
+            
+            if (tab === 'questions') loadQuestions();
+            if (tab === 'users') loadUsers();
+        }
+        
+        async function loadDashboard() {
+            const qs = await db.getQuestions();
+            document.getElementById('adminTotalQs').textContent = qs.length;
+            
+            // Load from Firestore
+            const usersSnap = await firebase.firestore().collection('users').get();
+            document.getElementById('adminTotalUsers').textContent = usersSnap.size;
+        }
+        
+        async function loadQuestions() {
+            const qs = await db.getQuestions();
+            const tbody = document.getElementById('questionsTable');
+            tbody.innerHTML = qs.map(q => `
+                <tr>
+                    <td>${q.id}</td>
+                    <td>${q.subject}</td>
+                    <td>${q.topic}</td>
+                    <td>${q.year}</td>
+                    <td>${q.question.substring(0, 50)}...</td>
+                    <td>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem;">Edit</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function loadUsers() {
+            const snap = await firebase.firestore().collection('users').limit(50).get();
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = snap.docs.map(doc => {
+                const u = doc.data();
+                return `
+                    <tr>
+                        <td>${u.name || 'N/A'}</td>
+                        <td>${u.email || 'N/A'}</td>
+                        <td>${u.level || 1}</td>
+                        <td>${u.xp || 0}</td>
+                        <td>${u.premium ? '✅' : '❌'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        function showAddQuestion() {
+            // Implementation for adding questions
+            alert('Add question form would open here');
+        }
+    </script>
+</body>
+</html>

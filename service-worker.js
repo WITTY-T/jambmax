@@ -10,6 +10,11 @@ const STATIC_ASSETS = [
     '/js/exam.js',
     '/js/ai.js',
     '/js/app.js',
+    '/js/payment.js',
+    '/js/flashcards.js',
+    '/js/notifications.js',
+    '/js/leaderboard.js',
+    '/js/settings.js',
     'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
     'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js',
     'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js'
@@ -87,5 +92,21 @@ async function syncData() {
     const clients = await self.clients.matchAll();
     clients.forEach(client => {
         client.postMessage({ type: 'SYNC_DATA' });
+    });
+}
+self.addEventListener('sync', event => {
+    if (event.tag === 'sync-data') {
+        event.waitUntil(syncData());
+    }
+    if (event.tag === 'daily-reminder') {
+        event.waitUntil(showNotification('Study Reminder', 'Time for your daily JAMB practice!'));
+    }
+});
+
+async function showNotification(title, body) {
+    await self.registration.showNotification(title, {
+        body,
+        icon: '/icons/icon-192x192.png',
+        badge: '/icons/icon-72x72.png'
     });
 }
