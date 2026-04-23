@@ -1,4 +1,31 @@
 const app = {
+  
+    // ... your existing init(), updateStats(), etc. ...
+
+    navigate(page) {
+        // Update sidebar active state
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+
+        // Hide all pages, show target
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const target = document.getElementById(`${page}-page`);
+        if (target) {
+            target.classList.add('active');
+            target.scrollTop = 0;
+        }
+
+        // Page-specific initialization
+        if (page === 'progress') this.loadProgress?.();
+        if (page === 'profile') this.loadProfile?.();
+        if (page === 'leaderboard') leaderboard?.load();
+        if (page === 'flashcards') flashcards?.render();
+
+        // Close sidebar on mobile
+        document.getElementById('sidebar')?.classList.remove('open');
+    },
+
+    // ... rest of your methods ...
     async init() {
         await db.init();
         auth.init();
@@ -12,6 +39,8 @@ const app = {
         
         // Update stats
         this.updateStats();
+        
+
         
         // Connection status
         this.updateConnectionStatus();
