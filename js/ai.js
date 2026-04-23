@@ -1,6 +1,6 @@
 const ai = {
     messages: [],
-    apiKey: null, // Set your OpenAI API key here or in settings
+    apiKey: "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", // Set your OpenAI API key here or in settings
     
     init() {
         this.updateStatus();
