@@ -7,6 +7,238 @@
     <meta name="theme-color" content="#0a192f">
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .pastq-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .pastq-filters .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .pastq-filters label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #8892b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .pastq-filters select, .pastq-filters button {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #233554;
+            background: #112240;
+            color: #ccd6f6;
+            font-size: 0.95rem;
+        }
+        .pastq-filters select:focus {
+            outline: none;
+            border-color: #64ffda;
+        }
+        .pastq-filters button {
+            background: #64ffda;
+            color: #0a192f;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .pastq-filters button:hover:not(:disabled) {
+            background: #4fd1c5;
+            transform: translateY(-1px);
+        }
+        .pastq-filters button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .question-card {
+            background: #112240;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #233554;
+            transition: border-color 0.2s;
+        }
+        .question-card:hover {
+            border-color: #64ffda;
+        }
+        .question-number {
+            display: inline-block;
+            background: #64ffda;
+            color: #0a192f;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+        .question-text {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #ccd6f6;
+            margin-bottom: 1rem;
+        }
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: #0a192f;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .option-label:hover {
+            border-color: #64ffda;
+        }
+        .option-label input[type="radio"] {
+            accent-color: #64ffda;
+            width: 18px;
+            height: 18px;
+        }
+        .option-label.selected {
+            border-color: #64ffda;
+            background: rgba(100, 255, 218, 0.1);
+        }
+        .option-label.correct {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.15);
+        }
+        .option-label.wrong {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+        }
+        
+        .explanation-box {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(100, 255, 218, 0.05);
+            border-left: 3px solid #64ffda;
+            border-radius: 0 8px 8px 0;
+            display: none;
+        }
+        .explanation-box.show {
+            display: block;
+        }
+        .explanation-box h4 {
+            color: #64ffda;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        .explanation-box p {
+            color: #a8b2d1;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .pastq-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #233554;
+        }
+        .pastq-nav button {
+            padding: 0.75rem 1.5rem;
+        }
+        
+        .score-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 4px solid #64ffda;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem auto;
+        }
+        .score-circle span {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #64ffda;
+        }
+        .score-circle small {
+            font-size: 0.9rem;
+            color: #8892b0;
+        }
+        
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 3rem;
+            color: #64ffda;
+        }
+        .loading-spinner::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #64ffda;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .api-status.online {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+        }
+        .api-status.offline {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+        
+        .subject-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.6rem;
+            background: #233554;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #64ffda;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .offline-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .offline-actions button {
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -16,35 +248,35 @@
                 <button class="sidebar-close" id="sidebarClose">×</button>
             </div>
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">
+                <a href="../Dashboard/dashboard.html" class="nav-item">
                     <span class="nav-icon">🏠</span>
                     <span>Dashboard</span>
                 </a>
-                <a href="study.html" class="nav-item">
+                <a href="../Dashboard/study.html" class="nav-item">
                     <span class="nav-icon">📚</span>
                     <span>Study Room</span>
                 </a>
-                <a href="exam.html" class="nav-item">
+                <a href="../Dashboard/exam.html" class="nav-item">
                     <span class="nav-icon">📝</span>
                     <span>Mock Exam</span>
                 </a>
-                <a href="past-questions.html" class="nav-item active">
+                <a href="../Dashboard/past-questions.html" class="nav-item active">
                     <span class="nav-icon">📋</span>
                     <span>Past Questions</span>
                 </a>
-                <a href="ai.html" class="nav-item">
+                <a href="../Dashboard/ai.html" class="nav-item">
                     <span class="nav-icon">🤖</span>
                     <span>AI Tutor</span>
                 </a>
-                <a href="flashcards.html" class="nav-item">
+                <a href="../Dashboard/flashcards.html" class="nav-item">
                     <span class="nav-icon">🎴</span>
                     <span>Flashcards</span>
                 </a>
-                <a href="progress.html" class="nav-item">
+                <a href="../Dashboard/progress.html" class="nav-item">
                     <span class="nav-icon">📊</span>
                     <span>Progress</span>
                 </a>
-                <a href="leaderboard.html" class="nav-item">
+                <a href="../Dashboard/leaderboard.html" class="nav-item">
                     <span class="nav-icon">🏆</span>
                     <span>Leaderboard</span>
                 </a>
@@ -71,7 +303,7 @@
                 <div class="top-bar-right">
                     <div class="xp-badge" id="xpBadge">⭐ 0 XP</div>
                     <div class="streak-badge" id="streakBadge">🔥 0</div>
-                    <div class="connection-status" id="connectionStatus">● Offline</div>
+                    <div class="api-status offline" id="apiStatus">● Checking API...</div>
                 </div>
             </header>
 
@@ -79,77 +311,130 @@
                 <div class="page active" id="past-questions-page">
                     <div class="page-header">
                         <h1>Past Questions</h1>
-                        <p>Browse and practice previous JAMB questions by year</p>
+                        <p>Practice real JAMB UTME questions from 2001–2013 via ALOC API</p>
                     </div>
                     
+                    <!-- Filters -->
                     <div class="card">
-                        <div class="past-questions-filters" style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-                            <div class="filter-group" style="flex: 1; min-width: 150px;">
+                        <div class="pastq-filters">
+                            <div class="filter-group">
                                 <label>Subject</label>
-                                <select id="pastqSubject" class="form-select" onchange="pastQuestions.loadYears()">
+                                <select id="pastqSubject">
                                     <option value="">Select Subject</option>
                                     <option value="english">English Language</option>
                                     <option value="mathematics">Mathematics</option>
+                                    <option value="commerce">Commerce</option>
+                                    <option value="accounting">Accounting</option>
+                                    <option value="biology">Biology</option>
                                     <option value="physics">Physics</option>
                                     <option value="chemistry">Chemistry</option>
-                                    <option value="biology">Biology</option>
+                                    <option value="englishlit">English Literature</option>
                                     <option value="government">Government</option>
+                                    <option value="crk">Christian Religious Knowledge</option>
+                                    <option value="geography">Geography</option>
                                     <option value="economics">Economics</option>
-                                    <option value="literature">Literature</option>
-                                    <option value="crs">CRS</option>
+                                    <option value="irk">Islamic Religious Knowledge</option>
+                                    <option value="civiledu">Civic Education</option>
+                                    <option value="insurance">Insurance</option>
+                                    <option value="currentaffairs">Current Affairs</option>
+                                    <option value="history">History</option>
                                 </select>
                             </div>
-                            <div class="filter-group" style="flex: 1; min-width: 150px;">
+                            <div class="filter-group">
                                 <label>Year</label>
-                                <select id="pastqYear" class="form-select" disabled>
-                                    <option value="">Select Year</option>
+                                <select id="pastqYear" disabled>
+                                    <option value="">All Years</option>
+                                    <option value="2001">2001</option>
+                                    <option value="2002">2002</option>
+                                    <option value="2003">2003</option>
+                                    <option value="2004">2004</option>
+                                    <option value="2005">2005</option>
+                                    <option value="2006">2006</option>
+                                    <option value="2007">2007</option>
+                                    <option value="2008">2008</option>
+                                    <option value="2009">2009</option>
+                                    <option value="2010">2010</option>
+                                    <option value="2011">2011</option>
+                                    <option value="2012">2012</option>
+                                    <option value="2013">2013</option>
                                 </select>
                             </div>
-                            <div class="filter-group" style="flex: 1; min-width: 150px; display: flex; align-items: flex-end;">
-                                <button class="btn btn-primary" onclick="pastQuestions.loadQuestions()" id="pastqLoadBtn" disabled>
+                            <div class="filter-group">
+                                <label>Number of Questions</label>
+                                <select id="pastqCount">
+                                    <option value="5">5 Questions</option>
+                                    <option value="10" selected>10 Questions</option>
+                                    <option value="20">20 Questions</option>
+                                    <option value="40">40 Questions</option>
+                                </select>
+                            </div>
+                            <div class="filter-group" style="justify-content: flex-end;">
+                                <label>&nbsp;</label>
+                                <button id="pastqLoadBtn" onclick="pastQuestions.load()" disabled>
                                     Load Questions
                                 </button>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="pastqEmpty" class="card empty-state" style="padding: 3rem; text-align: center;">
+                        <div style="font-size: 3.5rem; margin-bottom: 1rem;">📋</div>
+                        <h3>JAMB Past Questions Archive</h3>
+                        <p style="color: #8892b0; max-width: 500px; margin: 0 auto 1.5rem;">
+                            Access over <strong>6,000+ real JAMB UTME past questions</strong> powered by the 
+                            <a href="https://questions.aloc.com.ng" target="_blank" style="color: #64ffda;">ALOC API</a>.
+                            Select a subject and year to start practicing.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                            <span class="subject-badge">📚 17 Subjects</span>
+                            <span class="subject-badge">📅 2001–2013</span>
+                            <span class="subject-badge">✅ With Answers</span>
+                            <span class="subject-badge">💡 Explanations</span>
+                        </div>
+                        <div class="offline-actions">
+                            <button class="btn btn-outline" onclick="pastQuestions.downloadAllOffline()">
+                                📥 Download for Offline
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading -->
+                    <div id="pastqLoading" class="card" style="display: none;">
+                        <div class="loading-spinner">Loading questions from ALOC API...</div>
+                    </div>
+
+                    <!-- Questions List -->
+                    <div id="pastqList" style="display: none;">
+                        <div class="progress-bar" style="margin-bottom: 1.5rem;">
+                            <div class="progress-fill" id="pastqProgress"></div>
+                        </div>
+                        <div id="pastqQuestions"></div>
                         
-                        <div id="pastqContainer">
-                            <div class="empty-state" style="padding: 3rem; text-align: center;">
-                                <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
-                                <h3>JAMB Past Questions Archive</h3>
-                                <p>Select a subject and year to browse previous exam questions.</p>
-                                <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
-                                    <span class="badge">2015 - 2024</span>
-                                    <span class="badge">9 Subjects</span>
-                                    <span class="badge">With Explanations</span>
-                                </div>
+                        <div class="pastq-nav">
+                            <button class="btn btn-outline" id="pastqPrev" onclick="pastQuestions.prev()">← Previous</button>
+                            <span id="pastqCounter" style="color: #8892b0; font-size: 0.9rem;">1 / 10</span>
+                            <button class="btn btn-primary" id="pastqNext" onclick="pastQuestions.next()">Next →</button>
+                            <button class="btn btn-success" id="pastqSubmit" onclick="pastQuestions.submit()" style="display: none;">Submit</button>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div id="pastqResults" style="display: none;">
+                        <div class="card results-card" style="text-align: center; padding: 2rem;">
+                            <h2>Session Complete! 🎉</h2>
+                            <div class="score-circle">
+                                <span id="pastqScorePercent">0%</span>
+                                <small id="pastqScoreDetail">0 / 0 correct</small>
+                            </div>
+                            <div id="pastqBreakdown" style="margin: 1.5rem 0;"></div>
+                            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                                <button class="btn btn-primary" onclick="pastQuestions.restart()">Try Again</button>
+                                <button class="btn btn-outline" onclick="pastQuestions.newSession()">New Session</button>
                             </div>
                         </div>
                         
-                        <div id="pastqList" style="display: none;">
-                            <div class="progress-bar" style="margin-bottom: 1rem;">
-                                <div class="progress-fill" id="pastqProgress"></div>
-                            </div>
-                            <div id="pastqQuestions"></div>
-                            <div class="study-controls" style="margin-top: 1.5rem;">
-                                <button class="btn btn-outline" onclick="pastQuestions.prev()">Previous</button>
-                                <button class="btn btn-primary" onclick="pastQuestions.next()">Next</button>
-                                <button class="btn btn-success" onclick="pastQuestions.submit()" style="display: none;" id="pastqSubmit">Submit</button>
-                            </div>
-                        </div>
-                        
-                        <div id="pastqResults" style="display: none;">
-                            <div class="results-card">
-                                <h2>Session Complete! 🎉</h2>
-                                <div class="score-circle" id="pastqScoreCircle">
-                                    <span id="pastqScore">0%</span>
-                                </div>
-                                <div id="pastqBreakdown"></div>
-                                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem;">
-                                    <button class="btn btn-primary" onclick="pastQuestions.restart()">Try Again</button>
-                                    <button class="btn btn-outline" onclick="window.location.href='past-questions.html'">Browse More</button>
-                                </div>
-                            </div>
-                        </div>
+                        <div id="pastqReview" style="margin-top: 1.5rem;"></div>
                     </div>
                 </div>
             </div>
@@ -158,6 +443,7 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -172,19 +458,11 @@
         };
         firebase.initializeApp(firebaseConfig);
     </script>
-  <script src="../data/english.js"></script>
-    <script src="../data/mathematics.js"></script>
-    <script src="../data/physics.js"></script>
-    <script src="../data/chemistry.js"></script>
-    <script src="../data/biology.js"></script>
-    <script src="../data/government.js"></script>
-    <script src="../data/economics.js"></script>
-    <script src="../data/literature.js"></script>
-    <script src="../data/crs.js"></script>
-    <script src="../js/data-loader.js"></script>
+
+    <!-- App Scripts -->
     <script src="../js/db.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/study.js"></script>
+    <script src="../js/past-questions.js"></script>
     <script src="../js/app.js"></script>
 </body>
 </html>
