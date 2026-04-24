@@ -870,7 +870,7 @@
             })
             .then(() => {
                 showToast('Account created! Redirecting...', 'success');
-                setTimeout(() => window.location.href = 'dashboard.html', 1500);
+                setTimeout(() => window.location.href = '../Dashboard/dashboard.html', 1500);
             })
             .catch(err => {
                 console.error('Signup error:', err);
@@ -880,7 +880,7 @@
         auth.signInWithEmailAndPassword(email, password)
             .then(() => {
                 showToast('Welcome back!', 'success');
-                setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                setTimeout(() => window.location.href = '../Dashboard/dashboard.html', 1000);
             })
             .catch(err => {
                 console.error('Login error:', err);
@@ -894,7 +894,7 @@
             auth.signInWithPopup(provider)
                 .then(() => {
                     showToast('Signed in with Google!', 'success');
-                    setTimeout(() => window.location.href = 'dashboard.html', 1000);
+                    setTimeout(() => window.location.href = '../Dashboard/dashboard.html', 1000);
                 })
                 .catch(err => showToast(err.message, 'error'));
         }
