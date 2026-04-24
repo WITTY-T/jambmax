@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Exam — JAMB MAX</title>
+    <meta name="theme-color" content="#0a192f">
+    <link rel="manifest" href="../manifest.json">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div id="app">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" class="logo">JAMB <span>MAX</span></a>
+                <button class="sidebar-close" id="sidebarClose">×</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="nav-item">
+                    <span class="nav-icon">🏠</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="study.html" class="nav-item">
+                    <span class="nav-icon">📚</span>
+                    <span>Study Room</span>
+                </a>
+                <a href="exam.html" class="nav-item active">
+                    <span class="nav-icon">📝</span>
+                    <span>Mock Exam</span>
+                </a>
+                <a href="past-questions.html" class="nav-item">
+                    <span class="nav-icon">📋</span>
+                    <span>Past Questions</span>
+                </a>
+                <a href="ai.html" class="nav-item">
+                    <span class="nav-icon">🤖</span>
+                    <span>AI Tutor</span>
+                </a>
+                <a href="flashcards.html" class="nav-item">
+                    <span class="nav-icon">🎴</span>
+                    <span>Flashcards</span>
+                </a>
+                <a href="progress.html" class="nav-item">
+                    <span class="nav-icon">📊</span>
+                    <span>Progress</span>
+                </a>
+                <a href="leaderboard.html" class="nav-item">
+                    <span class="nav-icon">🏆</span>
+                    <span>Leaderboard</span>
+                </a>
+                <a href="profile.html" class="nav-item">
+                    <span class="nav-icon">👤</span>
+                    <span>Profile</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-mini" id="userMini">
+                    <div class="user-avatar" id="userAvatar">?</div>
+                    <div class="user-info">
+                        <div class="user-name" id="userName">Guest</div>
+                        <div class="user-level" id="userLevel">Level 1</div>
+                    </div>
+                </div>
+                <button class="btn btn-outline btn-full" id="logoutBtn" style="display: none;">Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="menu-toggle" id="menuToggle">☰</button>
+                <div class="top-bar-right">
+                    <div class="xp-badge" id="xpBadge">⭐ 0 XP</div>
+                    <div class="streak-badge" id="streakBadge">🔥 0</div>
+                    <div class="connection-status" id="connectionStatus">● Offline</div>
+                </div>
+            </header>
+
+            <div class="page-content" id="pageContent">
+                <div class="page active" id="exam-page">
+                    <div class="page-header">
+                        <h1>Mock CBT Exam</h1>
+                        <p>Simulate the real JAMB experience</p>
+                    </div>
+                    
+                    <div id="examSetup">
+                        <div class="card">
+                            <h3>Exam Configuration</h3>
+                            <div class="exam-config">
+                                <div class="config-item">
+                                    <label>Use of English (Compulsory)</label>
+                                    <input type="checkbox" checked disabled>
+                                </div>
+                                <div class="config-item">
+                                    <label>Subject 2</label>
+                                    <select id="examSub2" class="form-select">
+                                        <option value="mathematics">Mathematics</option>
+                                        <option value="physics">Physics</option>
+                                        <option value="chemistry">Chemistry</option>
+                                        <option value="biology">Biology</option>
+                                        <option value="government">Government</option>
+                                        <option value="economics">Economics</option>
+                                        <option value="literature">Literature</option>
+                                        <option value="crs">CRS</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label>Subject 3</label>
+                                    <select id="examSub3" class="form-select">
+                                        <option value="physics">Physics</option>
+                                        <option value="chemistry">Chemistry</option>
+                                        <option value="biology">Biology</option>
+                                        <option value="government">Government</option>
+                                        <option value="economics">Economics</option>
+                                        <option value="literature">Literature</option>
+                                        <option value="crs">CRS</option>
+                                    </select>
+                                </div>
+                                <div class="config-item">
+                                    <label>Subject 4</label>
+                                    <select id="examSub4" class="form-select">
+                                        <option value="chemistry">Chemistry</option>
+                                        <option value="physics">Physics</option>
+                                        <option value="biology">Biology</option>
+                                        <option value="government">Government</option>
+                                        <option value="economics">Economics</option>
+                                        <option value="literature">Literature</option>
+                                        <option value="crs">CRS</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-lg" onclick="exam.start()">Start Exam</button>
+                        </div>
+                    </div>
+                    
+                    <div id="examInterface" style="display: none;">
+                        <div class="exam-header">
+                            <div class="timer" id="examTimer">02:00:00</div>
+                            <div class="exam-meta">
+                                <span id="examSubjectLabel">English</span>
+                                <span id="examProgress">1 / 60</span>
+                            </div>
+                        </div>
+                        
+                        <div class="exam-layout">
+                            <div class="exam-main">
+                                <div class="question-box" id="examQuestionBox"></div>
+                                <div class="exam-nav-buttons">
+                                    <button class="btn btn-outline" onclick="exam.prev()">← Previous</button>
+                                    <button class="btn btn-warning" onclick="exam.flag()">🚩 Flag</button>
+                                    <button class="btn btn-outline" onclick="exam.next()">Next →</button>
+                                </div>
+                            </div>
+                            
+                            <div class="exam-sidebar">
+                                <div class="nav-panel">
+                                    <h4>Question Navigator</h4>
+                                    <div class="nav-grid" id="examNavGrid"></div>
+                                </div>
+                                <button class="btn btn-danger btn-full" onclick="exam.submit()">Submit Exam</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="examResults" style="display: none;">
+                        <div class="results-card">
+                            <h2>Exam Complete! 🎉</h2>
+                            <div class="score-display">
+                                <div class="score-main" id="examScore">0</div>
+                                <div class="score-total">/ 400</div>
+                            </div>
+                            <div class="score-breakdown" id="examBreakdown"></div>
+                            <div class="results-actions">
+                                <button class="btn btn-primary" onclick="exam.review()">Review Answers</button>
+                                <button class="btn btn-outline" onclick="exam.restart()">New Exam</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCduP8roSRxqEiWGxWE6mJQuLI6--L8PYU",
+            authDomain: "jambmax.firebaseapp.com",
+            projectId: "jambmax",
+            storageBucket: "jambmax.firebasestorage.app",
+            messagingSenderId: "598048583687",
+            appId: "1:598048583687:web:51fd9a184c317a0043faa2"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+   <script src="../data/english.js"></script>
+    <script src="../data/mathematics.js"></script>
+    <script src="../data/physics.js"></script>
+    <script src="../data/chemistry.js"></script>
+    <script src="../data/biology.js"></script>
+    <script src="../data/government.js"></script>
+    <script src="../data/economics.js"></script>
+    <script src="../data/literature.js"></script>
+    <script src="../data/crs.js"></script>
+    <script src="../js/data-loader.js"></script>
+    <script src="../js/db.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/study.js"></script>
+    <script src="../js/app.js"></script>
+</body>
+</html>
