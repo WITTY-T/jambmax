@@ -1,129 +1,177 @@
 /**
- * JAMB MAX - Auth Module
- * Firebase Auth with offline fallback
+ * JAMB MAX - Database Module
+ * Firebase Firestore with offline fallback
  */
 
-const auth = {
-    user: null,
+const db = {
+    firestore: null,
     isOnline: false,
+    persistenceEnabled: false,
 
     init() {
-        console.log('[Auth] Initializing...');
+        try {
+            // Firestore is already initialized by the Firebase SDK script
+            this.firestore = firebase.firestore();
 
-        // Listen for auth state changes
-        firebase.auth().onAuthStateChanged(user => {
-            this.user = user;
-            console.log('[Auth] State changed:', user ? user.email : 'signed out');
-
-            if (user) {
-                // Try to load cloud data, fall back to local
-                this.loadUserData().catch(err => {
-                    console.warn('[Auth] Cloud load failed:', err.message);
-                }).finally(() => {
-                    this.updateUI();
-                });
-            } else {
-                this.updateUI();
+            // Only enable persistence once
+            if (!this.persistenceEnabled) {
+                this.firestore.enablePersistence({ synchronizeTabs: true })
+                    .then(() => {
+                        console.log('[DB] Offline persistence enabled');
+                        this.persistenceEnabled = true;
+                    })
+                    .catch(err => {
+                        if (err.code === 'failed-precondition') {
+                            console.log('[DB] Persistence already enabled in another tab');
+                        } else if (err.code === 'unimplemented') {
+                            console.warn('[DB] Browser does not support persistence');
+                        } else {
+                            console.warn('[DB] Persistence failed:', err.message);
+                        }
+                    });
             }
-        });
+
+            this.isOnline = true;
+            console.log('[DB] Firestore initialized');
+
+        } catch (e) {
+            console.error('[DB] Init error:', e.message);
+            this.isOnline = false;
+        }
+    },
+
+    async sync() {
+        if (!this.isOnline || !this.firestore) {
+            app.showToast('Working offline — sync when connected');
+            return false;
+        }
+
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                app.showToast('Sign in to sync data');
+                return false;
+            }
+
+            const data = this.getLocalData();
+            await this.firestore.collection('users').doc(user.uid).set(data, { merge: true });
+
+            app.showToast('Data synced to cloud');
+            return true;
+
+        } catch (err) {
+            console.error('[DB] Sync failed:', err);
+            app.showToast('Sync failed — saved locally');
+            return false;
+        }
+    },
+
+    async downloadAll() {
+        if (!this.isOnline || !this.firestore) {
+            app.showToast('Connect to internet to download');
+            return;
+        }
+
+        app.showToast('Downloading all questions for offline...');
+        // Trigger past questions download
+        if (typeof pastQuestions !== 'undefined') {
+            await pastQuestions.downloadAllOffline();
+        }
     },
 
     async loadUserData() {
-        // Use db module if available
-        if (typeof db !== 'undefined' && db.loadUserData) {
-            return await db.loadUserData();
+        if (!this.isOnline || !this.firestore) {
+            console.log('[DB] Offline — using local data');
+            return this.getLocalData();
         }
 
-        // Fallback: direct Firestore access
         try {
-            const firestore = firebase.firestore();
-            const doc = await firestore.collection('users').doc(this.user.uid).get();
+            const user = firebase.auth().currentUser;
+            if (!user) return this.getLocalData();
 
+            const doc = await this.firestore.collection('users').doc(user.uid).get();
             if (doc.exists) {
-                const data = doc.data();
-                localStorage.setItem('jambmax_user_data', JSON.stringify(data));
-                return data;
+                const cloudData = doc.data();
+                const localData = this.getLocalData();
+
+                // Merge: use newer timestamp
+                if (cloudData.lastUpdated && localData.lastUpdated) {
+                    if (cloudData.lastUpdated > localData.lastUpdated) {
+                        this.saveLocalData(cloudData);
+                        return cloudData;
+                    }
+                }
+                return localData;
             }
+            return this.getLocalData();
+
         } catch (err) {
-            console.warn('[Auth] Direct Firestore failed:', err.message);
-        }
-
-        // Final fallback: localStorage
-        const local = localStorage.getItem('jambmax_user_data');
-        return local ? JSON.parse(local) : {};
-    },
-
-    updateUI() {
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profileAvatar = document.getElementById('profileAvatar');
-        const logoutBtn = document.getElementById('logoutBtn');
-
-        if (this.user) {
-            const name = this.user.displayName || this.user.email?.split('@')[0] || 'User';
-            const initial = name[0].toUpperCase();
-
-            if (userName) userName.textContent = name;
-            if (userAvatar) userAvatar.textContent = initial;
-            if (profileName) profileName.textContent = name;
-            if (profileEmail) profileEmail.textContent = this.user.email || 'Signed in';
-            if (profileAvatar) profileAvatar.textContent = initial;
-            if (logoutBtn) logoutBtn.style.display = 'block';
-        } else {
-            if (userName) userName.textContent = 'Guest';
-            if (userAvatar) userAvatar.textContent = '?';
-            if (profileName) profileName.textContent = 'Guest User';
-            if (profileEmail) profileEmail.textContent = 'Not signed in';
-            if (profileAvatar) profileAvatar.textContent = '?';
-            if (logoutBtn) logoutBtn.style.display = 'none';
+            console.warn('[DB] Load failed:', err.message);
+            return this.getLocalData();
         }
     },
 
-    async signIn(email, password) {
+    async saveUserData(data) {
+        const fullData = {
+            ...data,
+            lastUpdated: Date.now()
+        };
+
+        // Always save locally
+        this.saveLocalData(fullData);
+
+        // Try cloud if online
+        if (this.isOnline && this.firestore) {
+            try {
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    await this.firestore.collection('users').doc(user.uid).set(fullData, { merge: true });
+                }
+            } catch (err) {
+                console.warn('[DB] Cloud save failed:', err.message);
+            }
+        }
+    },
+
+    getLocalData() {
         try {
-            await firebase.auth().signInWithEmailAndPassword(email, password);
-            app.showToast('Signed in successfully');
-            return true;
-        } catch (err) {
-            app.showToast(err.message);
-            return false;
+            return JSON.parse(localStorage.getItem('jambmax_user_data') || '{}');
+        } catch {
+            return {};
         }
     },
 
-    async signUp(email, password) {
-        try {
-            await firebase.auth().createUserWithEmailAndPassword(email, password);
-            app.showToast('Account created');
-            return true;
-        } catch (err) {
-            app.showToast(err.message);
-            return false;
-        }
+    saveLocalData(data) {
+        localStorage.setItem('jambmax_user_data', JSON.stringify(data));
     },
 
-    async signOut() {
-        try {
-            await firebase.auth().signOut();
-            app.showToast('Signed out');
-        } catch (err) {
-            app.showToast(err.message);
-        }
-    },
+    clear() {
+        if (confirm('Delete all local data? This cannot be undone.')) {
+            localStorage.removeItem('jambmax_user_data');
+            localStorage.removeItem('jambmax_xp');
+            localStorage.removeItem('jambmax_streak');
+            localStorage.removeItem('jambmax_questions_solved');
+            localStorage.removeItem('jambmax_pastq_history');
+            localStorage.removeItem('aloc_api_token');
 
-    async signInWithGoogle() {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        try {
-            await firebase.auth().signInWithPopup(provider);
-            app.showToast('Signed in with Google');
-        } catch (err) {
-            app.showToast(err.message);
+            // Clear IndexedDB
+            const req = indexedDB.deleteDatabase('JAMBMAX_PastQuestions');
+            req.onsuccess = () => console.log('[DB] IndexedDB cleared');
+
+            app.showToast('All local data cleared');
+            setTimeout(() => location.reload(), 1000);
         }
     }
 };
 
-// Auto-init
-if (typeof firebase !== 'undefined') {
-    auth.init();
+// Auto-init when Firebase loads
+if (typeof firebase !== 'undefined' && firebase.firestore) {
+    db.init();
+} else {
+    // Wait for Firebase
+    window.addEventListener('load', () => {
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+            db.init();
+        }
+    });
 }
