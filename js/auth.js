@@ -1,58 +1,129 @@
-// js/auth.js - Add offline fallback
+/**
+ * JAMB MAX - Auth Module
+ * Firebase Auth with offline fallback
+ */
+
 const auth = {
     user: null,
     isOnline: false,
 
     init() {
+        console.log('[Auth] Initializing...');
+
+        // Listen for auth state changes
         firebase.auth().onAuthStateChanged(user => {
             this.user = user;
+            console.log('[Auth] State changed:', user ? user.email : 'signed out');
+
             if (user) {
-                this.loadCloudData().catch(e => {
-                    console.warn('[Auth] Cloud load failed, using local:', e);
-                    this.loadLocalData();
+                // Try to load cloud data, fall back to local
+                this.loadUserData().catch(err => {
+                    console.warn('[Auth] Cloud load failed:', err.message);
+                }).finally(() => {
+                    this.updateUI();
                 });
+            } else {
+                this.updateUI();
             }
-            this.updateUI();
         });
     },
 
-    async loadCloudData() {
-        if (!db.isOnline || !db.firestore) {
-            throw new Error('Firestore not available');
+    async loadUserData() {
+        // Use db module if available
+        if (typeof db !== 'undefined' && db.loadUserData) {
+            return await db.loadUserData();
         }
-        const doc = await db.firestore.collection('users').doc(this.user.uid).get();
-        if (doc.exists) {
-            const data = doc.data();
-            // Merge with local data
-            localStorage.setItem('jambmax_user_data', JSON.stringify(data));
-        }
-    },
 
-    loadLocalData() {
-        const local = localStorage.getItem('jambmax_user_data');
-        if (local) {
-            console.log('[Auth] Loaded from localStorage');
+        // Fallback: direct Firestore access
+        try {
+            const firestore = firebase.firestore();
+            const doc = await firestore.collection('users').doc(this.user.uid).get();
+
+            if (doc.exists) {
+                const data = doc.data();
+                localStorage.setItem('jambmax_user_data', JSON.stringify(data));
+                return data;
+            }
+        } catch (err) {
+            console.warn('[Auth] Direct Firestore failed:', err.message);
         }
+
+        // Final fallback: localStorage
+        const local = localStorage.getItem('jambmax_user_data');
+        return local ? JSON.parse(local) : {};
     },
 
     updateUI() {
-        // Update UI elements safely
-        const nameEl = document.getElementById('userName');
-        const avatarEl = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
         const profileName = document.getElementById('profileName');
-        
+        const profileEmail = document.getElementById('profileEmail');
+        const profileAvatar = document.getElementById('profileAvatar');
+        const logoutBtn = document.getElementById('logoutBtn');
+
         if (this.user) {
-            if (nameEl) nameEl.textContent = this.user.displayName || 'User';
-            if (avatarEl) avatarEl.textContent = (this.user.displayName || 'U')[0].toUpperCase();
-            if (profileName) profileName.textContent = this.user.displayName || 'User';
+            const name = this.user.displayName || this.user.email?.split('@')[0] || 'User';
+            const initial = name[0].toUpperCase();
+
+            if (userName) userName.textContent = name;
+            if (userAvatar) userAvatar.textContent = initial;
+            if (profileName) profileName.textContent = name;
+            if (profileEmail) profileEmail.textContent = this.user.email || 'Signed in';
+            if (profileAvatar) profileAvatar.textContent = initial;
+            if (logoutBtn) logoutBtn.style.display = 'block';
         } else {
-            if (nameEl) nameEl.textContent = 'Guest';
-            if (avatarEl) avatarEl.textContent = '?';
+            if (userName) userName.textContent = 'Guest';
+            if (userAvatar) userAvatar.textContent = '?';
+            if (profileName) profileName.textContent = 'Guest User';
+            if (profileEmail) profileEmail.textContent = 'Not signed in';
+            if (profileAvatar) profileAvatar.textContent = '?';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+        }
+    },
+
+    async signIn(email, password) {
+        try {
+            await firebase.auth().signInWithEmailAndPassword(email, password);
+            app.showToast('Signed in successfully');
+            return true;
+        } catch (err) {
+            app.showToast(err.message);
+            return false;
+        }
+    },
+
+    async signUp(email, password) {
+        try {
+            await firebase.auth().createUserWithEmailAndPassword(email, password);
+            app.showToast('Account created');
+            return true;
+        } catch (err) {
+            app.showToast(err.message);
+            return false;
+        }
+    },
+
+    async signOut() {
+        try {
+            await firebase.auth().signOut();
+            app.showToast('Signed out');
+        } catch (err) {
+            app.showToast(err.message);
+        }
+    },
+
+    async signInWithGoogle() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        try {
+            await firebase.auth().signInWithPopup(provider);
+            app.showToast('Signed in with Google');
+        } catch (err) {
+            app.showToast(err.message);
         }
     }
 };
 
-// Safe init
+// Auto-init
 if (typeof firebase !== 'undefined') {
     auth.init();
 }
