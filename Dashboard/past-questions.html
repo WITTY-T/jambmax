@@ -580,7 +580,7 @@
         },
 
         checkToken() {
-            this.ACCESS_TOKEN = localStorage.getItem('aloc_api_token') || '';
+            this.ACCESS_TOKEN = localStorage.getItem('ALOC-5187b20a50444f16b92c') || '';
             console.log('[PastQuestions] Token present:', !!this.ACCESS_TOKEN);
 
             if (!this.ACCESS_TOKEN) {
@@ -620,7 +620,7 @@
             }
 
             this.ACCESS_TOKEN = token;
-            localStorage.setItem('aloc_api_token', token);
+            localStorage.setItem('ALOC-5187b20a50444f16b92c', token);
 
             const prompt = document.getElementById('tokenPrompt');
             if (prompt) prompt.remove();
