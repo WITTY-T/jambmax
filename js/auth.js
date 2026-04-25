@@ -1,93 +1,71 @@
 /**
- * JAMB MAX - Auth Module
- * Firebase Auth with offline fallback
+ * JAMB MAX - Auth Module (v2)
  */
 
-const auth = {
+const jmAuth = {
     user: null,
-    isOnline: false,
 
     init() {
-        console.log('[Auth] Initializing...');
+        console.log('[jmAuth] Initializing...');
 
-        // Listen for auth state changes
         firebase.auth().onAuthStateChanged(user => {
             this.user = user;
-            console.log('[Auth] State changed:', user ? user.email : 'signed out');
+            console.log('[jmAuth] State:', user ? user.email : 'signed out');
 
             if (user) {
-                // Try to load cloud data, fall back to local
-                this.loadUserData().catch(err => {
-                    console.warn('[Auth] Cloud load failed:', err.message);
-                }).finally(() => {
-                    this.updateUI();
-                });
-            } else {
-                this.updateUI();
+                this.loadData();
             }
+            this.updateUI();
         });
     },
 
-    async loadUserData() {
-        // Use db module if available
-        if (typeof db !== 'undefined' && db.loadUserData) {
-            return await db.loadUserData();
-        }
-
-        // Fallback: direct Firestore access
+    async loadData() {
         try {
-            const firestore = firebase.firestore();
-            const doc = await firestore.collection('users').doc(this.user.uid).get();
-
-            if (doc.exists) {
-                const data = doc.data();
-                localStorage.setItem('jambmax_user_data', JSON.stringify(data));
-                return data;
+            if (typeof jmDB !== 'undefined' && jmDB.loadUserData) {
+                await jmDB.loadUserData();
             }
         } catch (err) {
-            console.warn('[Auth] Direct Firestore failed:', err.message);
+            console.warn('[jmAuth] Load failed:', err.message);
         }
-
-        // Final fallback: localStorage
-        const local = localStorage.getItem('jambmax_user_data');
-        return local ? JSON.parse(local) : {};
     },
 
     updateUI() {
-        const userName = document.getElementById('userName');
-        const userAvatar = document.getElementById('userAvatar');
-        const profileName = document.getElementById('profileName');
-        const profileEmail = document.getElementById('profileEmail');
-        const profileAvatar = document.getElementById('profileAvatar');
-        const logoutBtn = document.getElementById('logoutBtn');
+        const els = {
+            userName: document.getElementById('userName'),
+            userAvatar: document.getElementById('userAvatar'),
+            profileName: document.getElementById('profileName'),
+            profileEmail: document.getElementById('profileEmail'),
+            profileAvatar: document.getElementById('profileAvatar'),
+            logoutBtn: document.getElementById('logoutBtn')
+        };
 
         if (this.user) {
             const name = this.user.displayName || this.user.email?.split('@')[0] || 'User';
             const initial = name[0].toUpperCase();
 
-            if (userName) userName.textContent = name;
-            if (userAvatar) userAvatar.textContent = initial;
-            if (profileName) profileName.textContent = name;
-            if (profileEmail) profileEmail.textContent = this.user.email || 'Signed in';
-            if (profileAvatar) profileAvatar.textContent = initial;
-            if (logoutBtn) logoutBtn.style.display = 'block';
+            if (els.userName) els.userName.textContent = name;
+            if (els.userAvatar) els.userAvatar.textContent = initial;
+            if (els.profileName) els.profileName.textContent = name;
+            if (els.profileEmail) els.profileEmail.textContent = this.user.email || 'Signed in';
+            if (els.profileAvatar) els.profileAvatar.textContent = initial;
+            if (els.logoutBtn) els.logoutBtn.style.display = 'block';
         } else {
-            if (userName) userName.textContent = 'Guest';
-            if (userAvatar) userAvatar.textContent = '?';
-            if (profileName) profileName.textContent = 'Guest User';
-            if (profileEmail) profileEmail.textContent = 'Not signed in';
-            if (profileAvatar) profileAvatar.textContent = '?';
-            if (logoutBtn) logoutBtn.style.display = 'none';
+            if (els.userName) els.userName.textContent = 'Guest';
+            if (els.userAvatar) els.userAvatar.textContent = '?';
+            if (els.profileName) els.profileName.textContent = 'Guest User';
+            if (els.profileEmail) els.profileEmail.textContent = 'Not signed in';
+            if (els.profileAvatar) els.profileAvatar.textContent = '?';
+            if (els.logoutBtn) els.logoutBtn.style.display = 'none';
         }
     },
 
     async signIn(email, password) {
         try {
             await firebase.auth().signInWithEmailAndPassword(email, password);
-            app.showToast('Signed in successfully');
+            jmApp.showToast('Signed in');
             return true;
         } catch (err) {
-            app.showToast(err.message);
+            jmApp.showToast(err.message);
             return false;
         }
     },
@@ -95,10 +73,10 @@ const auth = {
     async signUp(email, password) {
         try {
             await firebase.auth().createUserWithEmailAndPassword(email, password);
-            app.showToast('Account created');
+            jmApp.showToast('Account created');
             return true;
         } catch (err) {
-            app.showToast(err.message);
+            jmApp.showToast(err.message);
             return false;
         }
     },
@@ -106,24 +84,23 @@ const auth = {
     async signOut() {
         try {
             await firebase.auth().signOut();
-            app.showToast('Signed out');
+            jmApp.showToast('Signed out');
         } catch (err) {
-            app.showToast(err.message);
+            jmApp.showToast(err.message);
         }
     },
 
-    async signInWithGoogle() {
+    async googleSignIn() {
         const provider = new firebase.auth.GoogleAuthProvider();
         try {
             await firebase.auth().signInWithPopup(provider);
-            app.showToast('Signed in with Google');
+            jmApp.showToast('Signed in with Google');
         } catch (err) {
-            app.showToast(err.message);
+            jmApp.showToast(err.message);
         }
     }
 };
 
-// Auto-init
 if (typeof firebase !== 'undefined') {
-    auth.init();
+    jmAuth.init();
 }

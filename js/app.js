@@ -1,177 +1,101 @@
 /**
- * JAMB MAX - Database Module
- * Firebase Firestore with offline fallback
+ * JAMB MAX - Main App Controller (v2)
  */
 
-const db = {
-    firestore: null,
-    isOnline: false,
-    persistenceEnabled: false,
-
+const jmApp = {
     init() {
-        try {
-            // Firestore is already initialized by the Firebase SDK script
-            this.firestore = firebase.firestore();
+        console.log('[jmApp] Initializing...');
 
-            // Only enable persistence once
-            if (!this.persistenceEnabled) {
-                this.firestore.enablePersistence({ synchronizeTabs: true })
-                    .then(() => {
-                        console.log('[DB] Offline persistence enabled');
-                        this.persistenceEnabled = true;
-                    })
-                    .catch(err => {
-                        if (err.code === 'failed-precondition') {
-                            console.log('[DB] Persistence already enabled in another tab');
-                        } else if (err.code === 'unimplemented') {
-                            console.warn('[DB] Browser does not support persistence');
-                        } else {
-                            console.warn('[DB] Persistence failed:', err.message);
-                        }
-                    });
-            }
+        this.setupNavigation();
+        this.updateStats();
 
-            this.isOnline = true;
-            console.log('[DB] Firestore initialized');
-
-        } catch (e) {
-            console.error('[DB] Init error:', e.message);
-            this.isOnline = false;
+        if (typeof jmDB !== 'undefined' && !jmDB.firestore) {
+            jmDB.init();
         }
+
+        console.log('[jmApp] Ready');
     },
 
-    async sync() {
-        if (!this.isOnline || !this.firestore) {
-            app.showToast('Working offline — sync when connected');
-            return false;
+    setupNavigation() {
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        }
+        if (sidebarClose && sidebar) {
+            sidebarClose.addEventListener('click', () => sidebar.classList.remove('open'));
         }
 
-        try {
-            const user = firebase.auth().currentUser;
-            if (!user) {
-                app.showToast('Sign in to sync data');
-                return false;
-            }
-
-            const data = this.getLocalData();
-            await this.firestore.collection('users').doc(user.uid).set(data, { merge: true });
-
-            app.showToast('Data synced to cloud');
-            return true;
-
-        } catch (err) {
-            console.error('[DB] Sync failed:', err);
-            app.showToast('Sync failed — saved locally');
-            return false;
-        }
-    },
-
-    async downloadAll() {
-        if (!this.isOnline || !this.firestore) {
-            app.showToast('Connect to internet to download');
-            return;
-        }
-
-        app.showToast('Downloading all questions for offline...');
-        // Trigger past questions download
-        if (typeof pastQuestions !== 'undefined') {
-            await pastQuestions.downloadAllOffline();
-        }
-    },
-
-    async loadUserData() {
-        if (!this.isOnline || !this.firestore) {
-            console.log('[DB] Offline — using local data');
-            return this.getLocalData();
-        }
-
-        try {
-            const user = firebase.auth().currentUser;
-            if (!user) return this.getLocalData();
-
-            const doc = await this.firestore.collection('users').doc(user.uid).get();
-            if (doc.exists) {
-                const cloudData = doc.data();
-                const localData = this.getLocalData();
-
-                // Merge: use newer timestamp
-                if (cloudData.lastUpdated && localData.lastUpdated) {
-                    if (cloudData.lastUpdated > localData.lastUpdated) {
-                        this.saveLocalData(cloudData);
-                        return cloudData;
-                    }
+        document.addEventListener('click', (e) => {
+            if (sidebar && sidebar.classList.contains('open')) {
+                if (!sidebar.contains(e.target) && e.target !== menuToggle) {
+                    sidebar.classList.remove('open');
                 }
-                return localData;
             }
-            return this.getLocalData();
-
-        } catch (err) {
-            console.warn('[DB] Load failed:', err.message);
-            return this.getLocalData();
-        }
+        });
     },
 
-    async saveUserData(data) {
-        const fullData = {
-            ...data,
-            lastUpdated: Date.now()
-        };
+    updateStats() {
+        const xp = parseInt(localStorage.getItem('jambmax_xp') || '0');
+        const streak = parseInt(localStorage.getItem('jambmax_streak') || '0');
+        const solved = parseInt(localStorage.getItem('jambmax_questions_solved') || '0');
 
-        // Always save locally
-        this.saveLocalData(fullData);
+        const xpBadge = document.getElementById('xpBadge');
+        const streakBadge = document.getElementById('streakBadge');
 
-        // Try cloud if online
-        if (this.isOnline && this.firestore) {
-            try {
-                const user = firebase.auth().currentUser;
-                if (user) {
-                    await this.firestore.collection('users').doc(user.uid).set(fullData, { merge: true });
-                }
-            } catch (err) {
-                console.warn('[DB] Cloud save failed:', err.message);
-            }
+        if (xpBadge) xpBadge.textContent = '⭐ ' + xp + ' XP';
+        if (streakBadge) streakBadge.textContent = '🔥 ' + streak;
+
+        const totalExams = document.getElementById('totalExams');
+        const questionsSolved = document.getElementById('questionsSolved');
+
+        if (totalExams) {
+            const history = JSON.parse(localStorage.getItem('jambmax_pastq_history') || '[]');
+            totalExams.textContent = history.length;
         }
+        if (questionsSolved) questionsSolved.textContent = solved;
+
+        const profileXP = document.getElementById('profileXP');
+        const profileStreak = document.getElementById('profileStreak');
+        const profileLevel = document.getElementById('profileLevel');
+
+        if (profileXP) profileXP.textContent = xp;
+        if (profileStreak) profileStreak.textContent = streak;
+        if (profileLevel) profileLevel.textContent = Math.floor(xp / 100) + 1;
     },
 
-    getLocalData() {
-        try {
-            return JSON.parse(localStorage.getItem('jambmax_user_data') || '{}');
-        } catch {
-            return {};
+    showToast(message, duration) {
+        duration = duration || 3000;
+        let toast = document.getElementById('toast');
+
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#64ffda;color:#0a192f;padding:0.75rem 1.5rem;border-radius:8px;font-weight:600;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;';
+            document.body.appendChild(toast);
         }
+
+        toast.textContent = message;
+        toast.style.opacity = '1';
+
+        setTimeout(function() {
+            toast.style.opacity = '0';
+        }, duration);
     },
 
-    saveLocalData(data) {
-        localStorage.setItem('jambmax_user_data', JSON.stringify(data));
+    navigate(page) {
+        window.location.href = page + '.html';
     },
 
-    clear() {
-        if (confirm('Delete all local data? This cannot be undone.')) {
-            localStorage.removeItem('jambmax_user_data');
-            localStorage.removeItem('jambmax_xp');
-            localStorage.removeItem('jambmax_streak');
-            localStorage.removeItem('jambmax_questions_solved');
-            localStorage.removeItem('jambmax_pastq_history');
-            localStorage.removeItem('aloc_api_token');
-
-            // Clear IndexedDB
-            const req = indexedDB.deleteDatabase('JAMBMAX_PastQuestions');
-            req.onsuccess = () => console.log('[DB] IndexedDB cleared');
-
-            app.showToast('All local data cleared');
-            setTimeout(() => location.reload(), 1000);
-        }
+    upgrade() {
+        this.showToast('Premium coming soon!');
     }
 };
 
-// Auto-init when Firebase loads
-if (typeof firebase !== 'undefined' && firebase.firestore) {
-    db.init();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() { jmApp.init(); });
 } else {
-    // Wait for Firebase
-    window.addEventListener('load', () => {
-        if (typeof firebase !== 'undefined' && firebase.firestore) {
-            db.init();
-        }
-    });
+    jmApp.init();
 }
