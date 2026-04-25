@@ -579,38 +579,51 @@
             this.loadCachedCount();
         },
 
-        checkToken() {
-            this.ACCESS_TOKEN = localStorage.getItem('ALOC-5187b20a50444f16b92c') || '';
-            console.log('[PastQuestions] Token present:', !!this.ACCESS_TOKEN);
+      checkToken() {
+    this.ACCESS_TOKEN = localStorage.getItem('ALOC-5187b20a50444f16b92c') || '';
+    console.log('[PastQuestions] Token present:', !!this.ACCESS_TOKEN);
 
-            if (!this.ACCESS_TOKEN) {
-                this.renderTokenPrompt();
-                this.setApiStatus(false, '● No API Token');
-            } else {
-                this.checkApiStatus();
-            }
-        },
+    // Force show prompt if no token — don't depend on $empty visibility
+    if (!this.ACCESS_TOKEN) {
+        this.setApiStatus(false, '● No API Token');
+        // Delay slightly to ensure DOM is ready
+        setTimeout(() => this.renderTokenPrompt(), 100);
+    } else {
+        this.checkApiStatus();
+    }
+},
 
-        renderTokenPrompt() {
-            if (!this.$empty || document.getElementById('tokenPrompt')) return;
-
-            const promptHtml = `
-                <div id="tokenPrompt" class="token-prompt">
-                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔑</div>
-                    <h4>ALOC API Token Required</h4>
-                    <p>
-                        The ALOC API requires an access token. Get yours free at 
-                        <a href="https://questions.aloc.com.ng" target="_blank" style="color: #64ffda;">questions.aloc.com.ng</a>
-                        (7,000 free calls on signup).
-                    </p>
-                    <input type="text" id="alocTokenInput" placeholder="Paste your ALOC access token here...">
-                    <button onclick="pastQuestions.saveToken()">Save Token & Continue</button>
-                    <small>Your token is stored locally in your browser. Never share it.</small>
-                </div>
-            `;
-            this.$empty.insertAdjacentHTML('beforeend', promptHtml);
-        },
-
+renderTokenPrompt() {
+    // Prevent duplicate prompts
+    if (document.getElementById('tokenPrompt')) return;
+    
+    // Find ANY visible container to attach to
+    const container = this.$empty || document.getElementById('pageContent') || document.body;
+    
+    const promptHtml = `
+        <div id="tokenPrompt" class="token-prompt" style="margin: 2rem auto; max-width: 500px;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔑</div>
+            <h4>ALOC API Token Required</h4>
+            <p>
+                Get your free token at 
+                <a href="https://questions.aloc.com.ng" target="_blank" style="color: #64ffda;">questions.aloc.com.ng</a>
+                (7,000 free calls on signup).
+            </p>
+            <input type="text" id="alocTokenInput" placeholder="Paste your ALOC access token here..." 
+                style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #233554; background: #0a192f; color: #ccd6f6; margin-bottom: 0.75rem;">
+            <button onclick="pastQuestions.saveToken()" 
+                style="width: 100%; padding: 0.75rem; background: #64ffda; color: #0a192f; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+                Save Token & Continue
+            </button>
+            <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.75rem; display: block;">
+                Your token is stored locally. Never share it.
+            </small>
+        </div>
+    `;
+    
+    // Insert at top of container
+    container.insertAdjacentHTML('afterbegin', promptHtml);
+},
         saveToken() {
             const input = document.getElementById('alocTokenInput');
             const token = input.value.trim();
