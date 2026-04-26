@@ -207,7 +207,7 @@ const pastQuestions = {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.ACCESS_TOKEN}`,
-                    'Accept': 'application/json'
+                   'Accept': '*/*'
                 },
                 signal: controller.signal
             });
@@ -409,7 +409,7 @@ const pastQuestions = {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${this.ACCESS_TOKEN}`,
-                    'Accept': 'application/json',
+                    'Accept': '*/*',
                     'Content-Type': 'application/json'
                 },
                 signal: controller.signal
