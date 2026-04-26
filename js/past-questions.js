@@ -12,8 +12,7 @@ const pastQuestions = {
     // 🔑 ALOC API Access Token — REQUIRED
     // Get yours free at: https://questions.aloc.com.ng
     // 7,000 free API calls on the free plan
-    ACCESS_TOKEN: localStorage.getItem('ALOC-5187b20a50444f16b92c') || '',
-    
+   ACCESS_TOKEN: localStorage.getItem('aloc_api_token') || '',
     // IndexedDB for offline caching
     DB_NAME: 'JAMBMAX_PastQuestions',
     DB_VERSION: 1,
