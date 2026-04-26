@@ -12,7 +12,8 @@ const pastQuestions = {
     // 🔑 ALOC API Access Token — REQUIRED
     // Get yours free at: https://questions.aloc.com.ng
     // 7,000 free API calls on the free plan
-   ACCESS_TOKEN: localStorage.getItem('aloc_api_token') || '',
+    ACCESS_TOKEN: localStorage.getItem('aloc_api_token') || '',
+    
     // IndexedDB for offline caching
     DB_NAME: 'JAMBMAX_PastQuestions',
     DB_VERSION: 1,
@@ -203,26 +204,36 @@ const pastQuestions = {
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 8000);
             
-            const response = await fetch(`${this.API_BASE}/q/1?subject=english`, {
+            const testUrl = `${this.API_BASE}/q/1?subject=english`;
+            console.log('[PastQuestions] Testing API URL:', testUrl);
+            console.log('[PastQuestions] Token:', this.ACCESS_TOKEN.substring(0, 10) + '...');
+            
+            const response = await fetch(testUrl, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${this.ACCESS_TOKEN}`,
-                   'Accept': '*/*'
+                    'Authorization': `Bearer ${this.ACCESS_TOKEN}`
                 },
                 signal: controller.signal
             });
             
             clearTimeout(timeout);
             
+            console.log('[PastQuestions] API Response Status:', response.status);
+            
             if (response.ok) {
                 this.setApiStatus(true, '● ALOC API Online');
             } else if (response.status === 401) {
                 this.setApiStatus(false, '● Invalid Token');
                 app.showToast('Invalid API token. Please check your token.');
+            } else if (response.status === 406) {
+                // Try without any Accept header
+                console.warn('[PastQuestions] 406 Error - trying with no Accept header');
+                this.setApiStatus(false, '● API Error 406');
             } else {
-                this.setApiStatus(false, '● API Error');
+                this.setApiStatus(false, `● API Error ${response.status}`);
             }
         } catch (e) {
+            console.error('[PastQuestions] API check error:', e);
             this.setApiStatus(false, '● Offline Mode');
         }
     },
@@ -402,20 +413,22 @@ const pastQuestions = {
             let url = `${this.API_BASE}/q/${count}?subject=${subject}&type=utme`;
             if (year) url += `&year=${year}`;
 
+            console.log('[PastQuestions] Fetching from API:', url);
+
             const controller = new AbortController();
             const timeout = setTimeout(() => controller.abort(), 15000);
 
             const response = await fetch(url, {
                 method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${this.ACCESS_TOKEN}`,
-                    'Accept': '*/*',
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${this.ACCESS_TOKEN}`
                 },
                 signal: controller.signal
             });
 
             clearTimeout(timeout);
+
+            console.log('[PastQuestions] Fetch status:', response.status);
 
             if (response.status === 401) {
                 app.showToast('Invalid or expired API token');
