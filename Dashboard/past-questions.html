@@ -8,7 +8,7 @@
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        /* Past Questions Specific Styles */
+        /* ─── Past Questions Specific Styles ─── */
         .pastq-filters {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -241,15 +241,6 @@
         }
         .offline-actions button {
             padding: 0.6rem 1.2rem;
-            font-size: 0.85rem;
-        }
-
-        #alocTokenInput::placeholder {
-            color: #64748b;
-        }
-        #alocTokenInput:focus {
-            outline: none;
-            border-color: #64ffda;
         }
 
         .token-prompt {
@@ -281,6 +272,13 @@
             margin-bottom: 0.75rem;
             font-size: 0.85rem;
         }
+        .token-prompt input:focus {
+            outline: none;
+            border-color: #64ffda;
+        }
+        .token-prompt input::placeholder {
+            color: #64748b;
+        }
         .token-prompt button {
             width: 100%;
             padding: 0.75rem;
@@ -297,6 +295,19 @@
             margin-top: 0.75rem;
             display: block;
         }
+
+        .review-card {
+            opacity: 0.95;
+        }
+        .review-card.correct-review {
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+        .review-card.wrong-review {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+        .review-card.skipped-review {
+            border-color: rgba(136, 146, 176, 0.3);
+        }
     </style>
 <base target="_blank">
 </head>
@@ -308,42 +319,15 @@
                 <button class="sidebar-close" id="sidebarClose">×</button>
             </div>
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">
-                    <span class="nav-icon">🏠</span>
-                    <span>Dashboard</span>
-                </a>
-                <a href="study.html" class="nav-item">
-                    <span class="nav-icon">📚</span>
-                    <span>Study Room</span>
-                </a>
-                <a href="exam.html" class="nav-item">
-                    <span class="nav-icon">📝</span>
-                    <span>Mock Exam</span>
-                </a>
-                <a href="past-questions.html" class="nav-item active">
-                    <span class="nav-icon">📋</span>
-                    <span>Past Questions</span>
-                </a>
-                <a href="ai.html" class="nav-item">
-                    <span class="nav-icon">🤖</span>
-                    <span>AI Tutor</span>
-                </a>
-                <a href="flashcards.html" class="nav-item">
-                    <span class="nav-icon">🎴</span>
-                    <span>Flashcards</span>
-                </a>
-                <a href="progress.html" class="nav-item">
-                    <span class="nav-icon">📊</span>
-                    <span>Progress</span>
-                </a>
-                <a href="leaderboard.html" class="nav-item">
-                    <span class="nav-icon">🏆</span>
-                    <span>Leaderboard</span>
-                </a>
-                <a href="profile.html" class="nav-item">
-                    <span class="nav-icon">👤</span>
-                    <span>Profile</span>
-                </a>
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span>Dashboard</span></a>
+                <a href="study.html" class="nav-item"><span class="nav-icon">📚</span><span>Study Room</span></a>
+                <a href="exam.html" class="nav-item"><span class="nav-icon">📝</span><span>Mock Exam</span></a>
+                <a href="past-questions.html" class="nav-item active"><span class="nav-icon">📋</span><span>Past Questions</span></a>
+                <a href="ai.html" class="nav-item"><span class="nav-icon">🤖</span><span>AI Tutor</span></a>
+                <a href="flashcards.html" class="nav-item"><span class="nav-icon">🎴</span><span>Flashcards</span></a>
+                <a href="progress.html" class="nav-item"><span class="nav-icon">📊</span><span>Progress</span></a>
+                <a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span><span>Leaderboard</span></a>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-mini" id="userMini">
@@ -371,9 +355,10 @@
                 <div class="page active" id="past-questions-page">
                     <div class="page-header">
                         <h1>Past Questions</h1>
-                        <p>Practice real JAMB UTME questions from 2001–2013 via ALOC API</p>
+                        <p>Practice real JAMB UTME questions from 2001–2020 via ALOC API</p>
                     </div>
 
+                    <!-- Filters -->
                     <div class="card">
                         <div class="pastq-filters">
                             <div class="filter-group">
@@ -416,6 +401,13 @@
                                     <option value="2011">2011</option>
                                     <option value="2012">2012</option>
                                     <option value="2013">2013</option>
+                                    <option value="2014">2014</option>
+                                    <option value="2015">2015</option>
+                                    <option value="2016">2016</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2019">2019</option>
+                                    <option value="2020">2020</option>
                                 </select>
                             </div>
                             <div class="filter-group">
@@ -429,38 +421,40 @@
                             </div>
                             <div class="filter-group" style="justify-content: flex-end;">
                                 <label>&nbsp;</label>
-                                <button id="pastqLoadBtn" onclick="pastQuestions.load()" disabled>
-                                    Load Questions
-                                </button>
+                                <button id="pastqLoadBtn" disabled>Load Questions</button>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Empty / Intro State -->
                     <div id="pastqEmpty" class="card empty-state" style="padding: 3rem; text-align: center;">
                         <div style="font-size: 3.5rem; margin-bottom: 1rem;">📋</div>
                         <h3>JAMB Past Questions Archive</h3>
                         <p style="color: #8892b0; max-width: 500px; margin: 0 auto 1.5rem;">
-                            Access over <strong>6,000+ real JAMB UTME past questions</strong> powered by the 
+                            Access over <strong>20,000 real JAMB UTME / WASSCE past questions</strong> powered by the 
                             <a href="https://questions.aloc.com.ng" target="_blank" style="color: #64ffda;">ALOC API</a>.
                             Select a subject and year to start practicing.
                         </p>
                         <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
                             <span class="subject-badge">📚 17 Subjects</span>
-                            <span class="subject-badge">📅 2001–2013</span>
+                            <span class="subject-badge">📅 2001–2020</span>
                             <span class="subject-badge">✅ With Answers</span>
                             <span class="subject-badge">💡 Explanations</span>
                         </div>
                         <div class="offline-actions">
-                            <button class="btn btn-outline" onclick="pastQuestions.downloadAllOffline()">
+                            <button class="btn btn-outline" id="downloadOfflineBtn">
                                 📥 Download for Offline
                             </button>
                         </div>
+                        <p class="cached-info" style="color: #64ffda; font-size: 0.85rem; margin-top: 1rem; display: none;"></p>
                     </div>
 
+                    <!-- Loading -->
                     <div id="pastqLoading" class="card" style="display: none;">
                         <div class="loading-spinner">Loading questions from ALOC API...</div>
                     </div>
 
+                    <!-- Question List -->
                     <div id="pastqList" style="display: none;">
                         <div class="progress-bar" style="margin-bottom: 1.5rem;">
                             <div class="progress-fill" id="pastqProgress"></div>
@@ -468,13 +462,14 @@
                         <div id="pastqQuestions"></div>
 
                         <div class="pastq-nav">
-                            <button class="btn btn-outline" id="pastqPrev" onclick="pastQuestions.prev()">← Previous</button>
+                            <button class="btn btn-outline" id="pastqPrev">← Previous</button>
                             <span id="pastqCounter" style="color: #8892b0; font-size: 0.9rem;">1 / 10</span>
-                            <button class="btn btn-primary" id="pastqNext" onclick="pastQuestions.next()">Next →</button>
-                            <button class="btn btn-success" id="pastqSubmit" onclick="pastQuestions.submit()" style="display: none;">Submit</button>
+                            <button class="btn btn-primary" id="pastqNext">Next →</button>
+                            <button class="btn btn-success" id="pastqSubmit" style="display: none;">Submit</button>
                         </div>
                     </div>
 
+                    <!-- Results -->
                     <div id="pastqResults" style="display: none;">
                         <div class="card results-card" style="text-align: center; padding: 2rem;">
                             <h2>Session Complete! 🎉</h2>
@@ -484,11 +479,10 @@
                             </div>
                             <div id="pastqBreakdown" style="margin: 1.5rem 0;"></div>
                             <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                                <button class="btn btn-primary" onclick="pastQuestions.restart()">Try Again</button>
-                                <button class="btn btn-outline" onclick="pastQuestions.newSession()">New Session</button>
+                                <button class="btn btn-primary" id="pastqRestart">Try Again</button>
+                                <button class="btn btn-outline" id="pastqNewSession">New Session</button>
                             </div>
                         </div>
-
                         <div id="pastqReview" style="margin-top: 1.5rem;"></div>
                     </div>
                 </div>
@@ -514,731 +508,658 @@
         firebase.initializeApp(firebaseConfig);
     </script>
 
-    <!-- ALL JS INLINE - No external file dependencies -->
+    <!-- ============================================================
+         PAST QUESTIONS CONTROLLER  (INLINE, SELF-CONTAINED)
+         ALOC API v2  •  AccessToken header auth
+         ============================================================ -->
     <script>
-    // ============================================
-    // PAST QUESTIONS CONTROLLER (INLINE)
-    // ============================================
-    const pastQuestions = {
-        API_BASE: 'https://questions.aloc.com.ng/api/v2',
-        ACCESS_TOKEN: localStorage.getItem('ALOC-5187b20a50444f16b92c') || '',
+    (function() {
+        'use strict';
 
-        DB_NAME: 'JAMBMAX_PastQuestions',
-        DB_VERSION: 1,
-        STORE_NAME: 'cached_questions',
-        db: null,
+        const pastQuestions = {
+            // ─── ALOC API Config ───
+            API_BASE: 'https://questions.aloc.com.ng/api/v2',
+            // Token injected by user request:
+            ACCESS_TOKEN: 'ALOC-5187b20a50444f16b92c',
 
-        questions: [],
-        currentIndex: 0,
-        answers: {},
-        submitted: false,
-        sessionMeta: {},
+            // ─── IndexedDB ───
+            DB_NAME: 'JAMBMAX_PastQuestions_v2',
+            DB_VERSION: 1,
+            STORE_NAME: 'cached_questions',
+            db: null,
 
-        SUBJECTS: {
-            english: 'English Language',
-            mathematics: 'Mathematics',
-            commerce: 'Commerce',
-            accounting: 'Accounting',
-            biology: 'Biology',
-            physics: 'Physics',
-            chemistry: 'Chemistry',
-            englishlit: 'English Literature',
-            government: 'Government',
-            crk: 'Christian Religious Knowledge',
-            geography: 'Geography',
-            economics: 'Economics',
-            irk: 'Islamic Religious Knowledge',
-            civiledu: 'Civic Education',
-            insurance: 'Insurance',
-            currentaffairs: 'Current Affairs',
-            history: 'History'
-        },
+            // ─── Session State ───
+            questions: [],
+            currentIndex: 0,
+            answers: {},          // { index: 'a' }
+            submitted: false,
+            sessionMeta: {},
 
-        get $subject() { return document.getElementById('pastqSubject'); },
-        get $year() { return document.getElementById('pastqYear'); },
-        get $count() { return document.getElementById('pastqCount'); },
-        get $loadBtn() { return document.getElementById('pastqLoadBtn'); },
-        get $empty() { return document.getElementById('pastqEmpty'); },
-        get $loading() { return document.getElementById('pastqLoading'); },
-        get $list() { return document.getElementById('pastqList'); },
-        get $questions() { return document.getElementById('pastqQuestions'); },
-        get $progress() { return document.getElementById('pastqProgress'); },
-        get $counter() { return document.getElementById('pastqCounter'); },
-        get $prev() { return document.getElementById('pastqPrev'); },
-        get $next() { return document.getElementById('pastqNext'); },
-        get $submit() { return document.getElementById('pastqSubmit'); },
-        get $results() { return document.getElementById('pastqResults'); },
-        get $apiStatus() { return document.getElementById('apiStatus'); },
-        get $review() { return document.getElementById('pastqReview'); },
+            // ─── Subject Map ───
+            SUBJECTS: {
+                english: 'English Language',
+                mathematics: 'Mathematics',
+                commerce: 'Commerce',
+                accounting: 'Accounting',
+                biology: 'Biology',
+                physics: 'Physics',
+                chemistry: 'Chemistry',
+                englishlit: 'English Literature',
+                government: 'Government',
+                crk: 'Christian Religious Knowledge',
+                geography: 'Geography',
+                economics: 'Economics',
+                irk: 'Islamic Religious Knowledge',
+                civiledu: 'Civic Education',
+                insurance: 'Insurance',
+                currentaffairs: 'Current Affairs',
+                history: 'History'
+            },
 
-        async init() {
-            console.log('[PastQuestions] Initializing...');
-            await this.initDB();
-            this.checkToken();
-            this.bindEvents();
-            this.loadCachedCount();
-        },
+            // ─── DOM refs ───
+            get $subject()   { return document.getElementById('pastqSubject'); },
+            get $year()      { return document.getElementById('pastqYear'); },
+            get $count()     { return document.getElementById('pastqCount'); },
+            get $loadBtn()   { return document.getElementById('pastqLoadBtn'); },
+            get $empty()     { return document.getElementById('pastqEmpty'); },
+            get $loading()   { return document.getElementById('pastqLoading'); },
+            get $list()      { return document.getElementById('pastqList'); },
+            get $questions() { return document.getElementById('pastqQuestions'); },
+            get $progress()  { return document.getElementById('pastqProgress'); },
+            get $counter()   { return document.getElementById('pastqCounter'); },
+            get $prev()      { return document.getElementById('pastqPrev'); },
+            get $next()      { return document.getElementById('pastqNext'); },
+            get $submit()    { return document.getElementById('pastqSubmit'); },
+            get $results()   { return document.getElementById('pastqResults'); },
+            get $apiStatus() { return document.getElementById('apiStatus'); },
+            get $review()    { return document.getElementById('pastqReview'); },
 
-      checkToken() {
-    this.ACCESS_TOKEN = localStorage.getItem('ALOC-5187b20a50444f16b92c') || '';
-    console.log('[PastQuestions] Token present:', !!this.ACCESS_TOKEN);
+            // ─── Init ───
+            async init() {
+                console.log('[PastQuestions] Initializing v2...');
+                await this.initDB();
+                this.bindEvents();
+                this.loadCachedCount();
+                this.checkApiStatus();
+            },
 
-    // Force show prompt if no token — don't depend on $empty visibility
-    if (!this.ACCESS_TOKEN) {
-        this.setApiStatus(false, '● No API Token');
-        // Delay slightly to ensure DOM is ready
-        setTimeout(() => this.renderTokenPrompt(), 100);
-    } else {
-        this.checkApiStatus();
-    }
-},
+            // ─── IndexedDB ───
+            initDB() {
+                return new Promise((resolve, reject) => {
+                    const req = indexedDB.open(this.DB_NAME, this.DB_VERSION);
+                    req.onerror = () => { console.error('[DB] error', req.error); reject(req.error); };
+                    req.onsuccess = () => { this.db = req.result; resolve(); };
+                    req.onupgradeneeded = (e) => {
+                        const db = e.target.result;
+                        if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+                            const store = db.createObjectStore(this.STORE_NAME, { keyPath: 'cacheKey' });
+                            store.createIndex('subject', 'subject', { unique: false });
+                            store.createIndex('timestamp', 'timestamp', { unique: false });
+                        }
+                    };
+                });
+            },
 
-renderTokenPrompt() {
-    // Prevent duplicate prompts
-    if (document.getElementById('tokenPrompt')) return;
-    
-    // Find ANY visible container to attach to
-    const container = this.$empty || document.getElementById('pageContent') || document.body;
-    
-    const promptHtml = `
-        <div id="tokenPrompt" class="token-prompt" style="margin: 2rem auto; max-width: 500px;">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔑</div>
-            <h4>ALOC API Token Required</h4>
-            <p>
-                Get your free token at 
-                <a href="https://questions.aloc.com.ng" target="_blank" style="color: #64ffda;">questions.aloc.com.ng</a>
-                (7,000 free calls on signup).
-            </p>
-            <input type="text" id="alocTokenInput" placeholder="Paste your ALOC access token here..." 
-                style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #233554; background: #0a192f; color: #ccd6f6; margin-bottom: 0.75rem;">
-            <button onclick="pastQuestions.saveToken()" 
-                style="width: 100%; padding: 0.75rem; background: #64ffda; color: #0a192f; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
-                Save Token & Continue
-            </button>
-            <small style="color: #64748b; font-size: 0.75rem; margin-top: 0.75rem; display: block;">
-                Your token is stored locally. Never share it.
-            </small>
-        </div>
-    `;
-    
-    // Insert at top of container
-    container.insertAdjacentHTML('afterbegin', promptHtml);
-},
-        saveToken() {
-            const input = document.getElementById('alocTokenInput');
-            const token = input.value.trim();
-            if (!token) { 
-                this.showToast('Please enter a valid token'); 
-                return; 
-            }
-
-            this.ACCESS_TOKEN = token;
-            localStorage.setItem('ALOC-5187b20a50444f16b92c', token);
-
-            const prompt = document.getElementById('tokenPrompt');
-            if (prompt) prompt.remove();
-
-            this.showToast('Token saved! Testing connection...');
-            this.checkApiStatus();
-        },
-
-        clearToken() {
-           localStorage.removeItem('ALOC-5187b20a50444f16b92c');
-            this.ACCESS_TOKEN = '';
-            this.showToast('Token cleared');
-            location.reload();
-        },
-
-        initDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(this.DB_NAME, this.DB_VERSION);
-                request.onerror = () => { 
-                    console.error('[PastQuestions] DB error:', request.error); 
-                    reject(request.error); 
-                };
-                request.onsuccess = () => { 
-                    this.db = request.result; 
-                    resolve(); 
-                };
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains(this.STORE_NAME)) {
-                        const store = db.createObjectStore(this.STORE_NAME, { keyPath: 'cacheKey' });
-                        store.createIndex('subject', 'subject', { unique: false });
-                        store.createIndex('timestamp', 'timestamp', { unique: false });
-                    }
-                };
-            });
-        },
-
-        bindEvents() {
-            if (this.$subject) {
+            // ─── Events ───
+            bindEvents() {
+                // Subject change
                 this.$subject.addEventListener('change', () => {
                     const hasSubject = !!this.$subject.value;
-                    const hasToken = !!this.ACCESS_TOKEN;
-                    this.$loadBtn.disabled = !hasSubject || !hasToken;
+                    this.$loadBtn.disabled = !hasSubject;
                     this.$year.disabled = !hasSubject;
                 });
-            }
-        },
 
-        async checkApiStatus() {
-            if (!this.ACCESS_TOKEN) {
-                this.setApiStatus(false, '● No Token');
-                return;
-            }
+                // Load button
+                this.$loadBtn.addEventListener('click', () => this.load());
 
-            try {
-                console.log('[PastQuestions] Testing API with token...');
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 10000);
+                // Nav
+                this.$prev.addEventListener('click', () => this.prev());
+                this.$next.addEventListener('click', () => this.next());
+                this.$submit.addEventListener('click', () => this.submit());
 
-                const response = await fetch(`${this.API_BASE}/q/1?subject=english`, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${this.ACCESS_TOKEN}`,
-                        'Accept': 'application/json'
-                    },
-                    signal: controller.signal
-                });
+                // Results
+                document.getElementById('pastqRestart').addEventListener('click', () => this.restart());
+                document.getElementById('pastqNewSession').addEventListener('click', () => this.newSession());
+                document.getElementById('downloadOfflineBtn').addEventListener('click', () => this.downloadAllOffline());
+            },
 
-                clearTimeout(timeout);
-                console.log('[PastQuestions] API test status:', response.status);
+            // ─── API Health Check ───
+            async checkApiStatus() {
+                try {
+                    const ctrl = new AbortController();
+                    const t = setTimeout(() => ctrl.abort(), 8000);
+                    const res = await fetch(`${this.API_BASE}/q?subject=english`, {
+                        method: 'GET',
+                        headers: {
+                            'AccessToken': this.ACCESS_TOKEN,
+                            'Accept': 'application/json'
+                        },
+                        signal: ctrl.signal
+                    });
+                    clearTimeout(t);
 
-                if (response.ok) {
-                    this.setApiStatus(true, '● ALOC API Online');
-                    this.showToast('Connected to ALOC API!');
-                } else if (response.status === 401) {
-                    this.setApiStatus(false, '● Invalid Token');
-                    this.showToast('Invalid API token. Check questions.aloc.com.ng');
-                } else {
-                    this.setApiStatus(false, '● API Error ' + response.status);
-                }
-            } catch (e) {
-                console.error('[PastQuestions] API check failed:', e);
-                this.setApiStatus(false, '● API Unreachable');
-            }
-        },
-
-        setApiStatus(online, text) {
-            if (!this.$apiStatus) return;
-            this.$apiStatus.className = online ? 'api-status online' : 'api-status offline';
-            this.$apiStatus.textContent = text || (online ? '● ALOC API Online' : '● Offline Mode');
-            console.log('[PastQuestions] Status:', text);
-        },
-
-        getCacheKey(subject, year, count) {
-            return `${subject}_${year || 'all'}_${count}`;
-        },
-
-        async saveToCache(subject, year, count, questions) {
-            if (!this.db) return;
-            const transaction = this.db.transaction([this.STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(this.STORE_NAME);
-            const cacheKey = this.getCacheKey(subject, year, count);
-
-            return new Promise((resolve, reject) => {
-                const request = store.put({
-                    cacheKey, subject, year: year || 'all', count: parseInt(count),
-                    questions, timestamp: Date.now()
-                });
-                request.onsuccess = () => resolve();
-                request.onerror = () => reject(request.error);
-            });
-        },
-
-        async loadFromCache(subject, year, count) {
-            if (!this.db) return null;
-            const transaction = this.db.transaction([this.STORE_NAME], 'readonly');
-            const store = transaction.objectStore(this.STORE_NAME);
-            const cacheKey = this.getCacheKey(subject, year, count);
-
-            return new Promise((resolve) => {
-                const request = store.get(cacheKey);
-                request.onsuccess = () => {
-                    const result = request.result;
-                    if (result && (Date.now() - result.timestamp) < 30 * 24 * 60 * 60 * 1000) {
-                        resolve(result.questions);
+                    if (res.ok) {
+                        this.setApiStatus(true, '● ALOC API Online');
+                    } else if (res.status === 401) {
+                        this.setApiStatus(false, '● Invalid Token');
+                        this.showToast('Invalid API token — check questions.aloc.com.ng');
                     } else {
-                        resolve(null);
+                        this.setApiStatus(false, `● API Error ${res.status}`);
                     }
-                };
-                request.onerror = () => resolve(null);
-            });
-        },
-
-        async loadCachedCount() {
-            if (!this.db || !this.$empty) return;
-            const transaction = this.db.transaction([this.STORE_NAME], 'readonly');
-            const store = transaction.objectStore(this.STORE_NAME);
-
-            const count = await new Promise((resolve) => {
-                const request = store.count();
-                request.onsuccess = () => resolve(request.result);
-                request.onerror = () => resolve(0);
-            });
-
-            if (count > 0) {
-                const existing = this.$empty.querySelector('.cached-info');
-                if (!existing) {
-                    const info = document.createElement('p');
-                    info.className = 'cached-info';
-                    info.style.cssText = 'color: #64ffda; font-size: 0.85rem; margin-top: 1rem;';
-                    info.innerHTML = `📦 <strong>${count}</strong> question set(s) cached for offline use`;
-                    this.$empty.appendChild(info);
-                }
-            }
-        },
-
-        async load() {
-            const subject = this.$subject.value;
-            const year = this.$year.value;
-            const count = parseInt(this.$count.value);
-
-            if (!subject) { this.showToast('Please select a subject'); return; }
-            if (!this.ACCESS_TOKEN) {
-                this.showToast('Please add your ALOC API token first');
-                this.renderTokenPrompt();
-                return;
-            }
-
-            this.sessionMeta = { subject, year, count, subjectName: this.SUBJECTS[subject] };
-
-            this.$empty.style.display = 'none';
-            this.$loading.style.display = 'block';
-            this.$list.style.display = 'none';
-            this.$results.style.display = 'none';
-
-            try {
-                let questions = await this.fetchFromAPI(subject, year, count);
-                let fromCache = false;
-
-                if (!questions) {
-                    questions = await this.loadFromCache(subject, year, count);
-                    fromCache = !!questions;
-                }
-
-                if (!questions) {
-                    questions = await this.loadFromCache(subject, '', count) || 
-                               await this.loadFromCache(subject, year, 10) ||
-                               await this.loadFromCache(subject, '', 10);
-                    fromCache = !!questions;
-                }
-
-                if (!questions || questions.length === 0) {
-                    throw new Error('No questions available. Check your token or connection.');
-                }
-
-                this.questions = questions;
-                this.currentIndex = 0;
-                this.answers = {};
-                this.submitted = false;
-
-                if (fromCache) {
-                    this.showToast('Loaded from offline cache');
+                } catch (e) {
+                    console.warn('[PastQuestions] API check failed:', e);
                     this.setApiStatus(false, '● Offline Mode');
                 }
+            },
 
-                this.render();
-                this.$loading.style.display = 'none';
-                this.$list.style.display = 'block';
-                this.updateProgress();
+            setApiStatus(online, text) {
+                if (!this.$apiStatus) return;
+                this.$apiStatus.className = online ? 'api-status online' : 'api-status offline';
+                this.$apiStatus.textContent = text;
+            },
 
-            } catch (err) {
-                console.error('[PastQuestions] Load error:', err);
-                this.$loading.style.display = 'none';
-                this.$empty.style.display = 'block';
-                this.showToast(err.message || 'Failed to load questions');
-            }
-        },
+            // ─── Cache helpers ───
+            getCacheKey(subject, year, count) {
+                return `${subject}_${year || 'all'}_${count}`;
+            },
 
-        async fetchFromAPI(subject, year, count) {
-            if (!this.ACCESS_TOKEN) return null;
-
-            try {
-                let url = `${this.API_BASE}/q/${count}?subject=${encodeURIComponent(subject)}&type=utme`;
-                if (year) url += `&year=${encodeURIComponent(year)}`;
-
-                console.log('[PastQuestions] Fetching:', url);
-
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 15000);
-
-                const response = await fetch(url, {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${this.ACCESS_TOKEN}`,
-                        'Accept': 'application/json'
-                    },
-                    signal: controller.signal
+            async saveToCache(subject, year, count, questions) {
+                if (!this.db) return;
+                const tx = this.db.transaction([this.STORE_NAME], 'readwrite');
+                const store = tx.objectStore(this.STORE_NAME);
+                const key = this.getCacheKey(subject, year, count);
+                return new Promise((resolve, reject) => {
+                    const req = store.put({
+                        cacheKey: key,
+                        subject,
+                        year: year || 'all',
+                        count: parseInt(count),
+                        questions,
+                        timestamp: Date.now()
+                    });
+                    req.onsuccess = () => resolve();
+                    req.onerror = () => reject(req.error);
                 });
+            },
 
-                clearTimeout(timeout);
-                console.log('[PastQuestions] Response status:', response.status);
+            async loadFromCache(subject, year, count) {
+                if (!this.db) return null;
+                const tx = this.db.transaction([this.STORE_NAME], 'readonly');
+                const store = tx.objectStore(this.STORE_NAME);
+                const key = this.getCacheKey(subject, year, count);
+                return new Promise((resolve) => {
+                    const req = store.get(key);
+                    req.onsuccess = () => {
+                        const r = req.result;
+                        const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+                        resolve(r && (Date.now() - r.timestamp) < THIRTY_DAYS ? r.questions : null);
+                    };
+                    req.onerror = () => resolve(null);
+                });
+            },
 
-                if (response.status === 401) {
-                    this.showToast('Invalid or expired API token');
-                    this.setApiStatus(false, '● Invalid Token');
+            async loadCachedCount() {
+                if (!this.db || !this.$empty) return;
+                const tx = this.db.transaction([this.STORE_NAME], 'readonly');
+                const store = tx.objectStore(this.STORE_NAME);
+                const count = await new Promise((res) => {
+                    const req = store.count();
+                    req.onsuccess = () => res(req.result);
+                    req.onerror = () => res(0);
+                });
+                const info = this.$empty.querySelector('.cached-info');
+                if (count > 0) {
+                    info.style.display = 'block';
+                    info.innerHTML = `📦 <strong>${count}</strong> question set(s) cached for offline use`;
+                } else {
+                    info.style.display = 'none';
+                }
+            },
+
+            // ─── Main Load ───
+            async load() {
+                const subject = this.$subject.value;
+                const year    = this.$year.value;
+                const count   = parseInt(this.$count.value);
+
+                if (!subject) { this.showToast('Please select a subject'); return; }
+
+                this.sessionMeta = { subject, year, count, subjectName: this.SUBJECTS[subject] };
+
+                // UI states
+                this.$empty.style.display   = 'none';
+                this.$loading.style.display = 'block';
+                this.$list.style.display    = 'none';
+                this.$results.style.display = 'none';
+
+                try {
+                    // 1) Try API
+                    let questions = await this.fetchFromAPI(subject, year, count);
+                    let fromCache = false;
+
+                    // 2) Fallback cache
+                    if (!questions) {
+                        questions = await this.loadFromCache(subject, year, count);
+                        fromCache = !!questions;
+                    }
+                    if (!questions) {
+                        questions = await this.loadFromCache(subject, '', count) ||
+                                    await this.loadFromCache(subject, year, 10) ||
+                                    await this.loadFromCache(subject, '', 10);
+                        fromCache = !!questions;
+                    }
+
+                    if (!questions || questions.length === 0) {
+                        throw new Error('No questions available. Check connection or try different filters.');
+                    }
+
+                    this.questions    = questions;
+                    this.currentIndex = 0;
+                    this.answers      = {};
+                    this.submitted    = false;
+
+                    if (fromCache) {
+                        this.showToast('Loaded from offline cache');
+                        this.setApiStatus(false, '● Offline Mode');
+                    }
+
+                    this.render();
+                    this.$loading.style.display = 'none';
+                    this.$list.style.display    = 'block';
+                    this.updateProgress();
+
+                } catch (err) {
+                    console.error('[PastQuestions] Load error:', err);
+                    this.$loading.style.display = 'none';
+                    this.$empty.style.display   = 'block';
+                    this.showToast(err.message || 'Failed to load questions');
+                }
+            },
+
+            // ─── API Fetch ───
+            async fetchFromAPI(subject, year, count) {
+                try {
+                    // ALOC v2 endpoint: /q/{count}?subject=...&year=...&type=utme
+                    // Also supports /m?subject=... for bulk (max 40)
+                    let url = `${this.API_BASE}/q/${count}?subject=${encodeURIComponent(subject)}&type=utme`;
+                    if (year) url += `&year=${encodeURIComponent(year)}`;
+
+                    console.log('[PastQuestions] Fetching:', url);
+
+                    const ctrl = new AbortController();
+                    const t = setTimeout(() => ctrl.abort(), 15000);
+
+                    const res = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'AccessToken': this.ACCESS_TOKEN,
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        signal: ctrl.signal
+                    });
+                    clearTimeout(t);
+
+                    console.log('[PastQuestions] Status:', res.status);
+
+                    if (res.status === 401) {
+                        this.showToast('Invalid or expired API token');
+                        this.setApiStatus(false, '● Invalid Token');
+                        return null;
+                    }
+                    if (!res.ok) {
+                        const txt = await res.text();
+                        throw new Error(`HTTP ${res.status}: ${txt}`);
+                    }
+
+                    const payload = await res.json();
+                    console.log('[PastQuestions] Payload:', payload);
+
+                    // ALOC returns: { subject, status, data: { id, question, option, answer, solution, examtype, examyear } }
+                    // OR for multi: data may be an array or data.questions stringified
+                    let raw = payload.data;
+
+                    // Handle stringified JSON inside data.questions (legacy format)
+                    if (raw && typeof raw.questions === 'string') {
+                        try { raw = JSON.parse(raw.questions); } catch(e) {}
+                    }
+                    // If data is a single object, wrap it
+                    const arr = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+                    const normalized = arr.map(q => this.normalizeQuestion(q)).filter(Boolean);
+
+                    // Save to cache
+                    await this.saveToCache(subject, year, count, normalized);
+                    return normalized;
+
+                } catch (err) {
+                    console.warn('[PastQuestions] API fetch failed:', err);
                     return null;
                 }
+            },
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('[PastQuestions] API error body:', errorText);
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+            // ─── Normalize ALOC question ───
+            normalizeQuestion(q) {
+                if (!q) return null;
+                const text = q.question || q.question_text || q.text || '';
+                let opts = q.option || q.options || {};
+                if (typeof opts === 'string') {
+                    try { opts = JSON.parse(opts); } catch(e) { opts = {}; }
                 }
 
-                const data = await response.json();
-                console.log('[PastQuestions] API response:', data);
-
-                if (!data.success || !data.data) {
-                    throw new Error(data.message || 'Invalid API response structure');
+                // Normalize option keys to a,b,c,d,e
+                const outOpts = {};
+                ['a','b','c','d','e'].forEach(k => { if (opts[k]) outOpts[k] = opts[k]; });
+                if (Object.keys(outOpts).length === 0) {
+                    ['1','2','3','4','5'].forEach((k, i) => {
+                        const letters = ['a','b','c','d','e'];
+                        if (opts[k]) outOpts[letters[i]] = opts[k];
+                    });
                 }
 
-                let rawQuestions = data.data.questions || data.data;
-                if (typeof rawQuestions === 'string') {
-                    try { rawQuestions = JSON.parse(rawQuestions); } catch (e) {}
-                }
+                return {
+                    id: q.id || q.question_id || Math.random().toString(36).slice(2, 11),
+                    question: text,
+                    options: outOpts,
+                    answer: (q.answer || q.correct_answer || '').toString().trim().toLowerCase(),
+                    explanation: q.solution || q.explanation || q.answer_detail || '',
+                    year: q.examyear || q.year || '',
+                    examtype: q.examtype || q.type || 'utme',
+                    subject: q.subject || ''
+                };
+            },
 
-                const questions = Array.isArray(rawQuestions) ? rawQuestions : [rawQuestions];
-                const normalized = questions.map(q => this.normalizeQuestion(q)).filter(Boolean);
+            // ─── Render current question ───
+            render() {
+                const q = this.questions[this.currentIndex];
+                if (!q) return;
 
-                await this.saveToCache(subject, year, count, normalized);
-                return normalized;
+                const labels = { a:'A', b:'B', c:'C', d:'D', e:'E' };
+                const keys   = Object.keys(q.options).filter(k => q.options[k]);
+                const picked = this.answers[this.currentIndex];
 
-            } catch (err) {
-                console.error('[PastQuestions] Fetch failed:', err);
-                return null;
-            }
-        },
+                let html = `
+                    <div class="question-card" data-index="${this.currentIndex}">
+                        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+                            <span class="question-number">Question ${this.currentIndex + 1} of ${this.questions.length}</span>
+                            ${q.year ? `<span class="subject-badge">${q.year}</span>` : ''}
+                            ${q.examtype ? `<span class="subject-badge">${q.examtype.toUpperCase()}</span>` : ''}
+                        </div>
+                        <div class="question-text">${this.escapeHtml(q.question)}</div>
+                        <div class="options-list">
+                `;
 
-        normalizeQuestion(q) {
-            if (!q) return null;
+                keys.forEach(key => {
+                    const lbl = labels[key] || key.toUpperCase();
+                    let cls = '';
+                    if (this.submitted) {
+                        if (key === q.answer) cls = 'correct';
+                        else if (key === picked && key !== q.answer) cls = 'wrong';
+                    } else if (key === picked) {
+                        cls = 'selected';
+                    }
 
-            const questionText = q.question || q.question_text || q.text || '';
-            let options = q.option || q.options || {};
-
-            if (typeof options === 'string') {
-                try { options = JSON.parse(options); } catch (e) { options = {}; }
-            }
-
-            const normalizedOptions = {};
-            ['a', 'b', 'c', 'd', 'e'].forEach(key => {
-                if (options[key]) normalizedOptions[key] = options[key];
-            });
-
-            if (Object.keys(normalizedOptions).length === 0) {
-                ['1', '2', '3', '4', '5'].forEach((key, idx) => {
-                    const letters = ['a', 'b', 'c', 'd', 'e'];
-                    if (options[key]) normalizedOptions[letters[idx]] = options[key];
+                    html += `
+                        <label class="option-label ${cls}"
+                               style="${this.submitted ? 'cursor:default;' : ''}">
+                            <input type="radio" name="q${this.currentIndex}" value="${key}"
+                                ${key === picked ? 'checked' : ''}
+                                ${this.submitted ? 'disabled' : ''}>
+                            <span><strong>${lbl}.</strong> ${this.escapeHtml(q.options[key])}</span>
+                        </label>
+                    `;
                 });
-            }
 
-            return {
-                id: q.id || q.question_id || Math.random().toString(36).substr(2, 9),
-                question: questionText,
-                options: normalizedOptions,
-                answer: (q.answer || q.correct_answer || '').toString().trim().toLowerCase(),
-                explanation: q.explanation || q.solution || q.answer_detail || '',
-                year: q.year || q.examyear || '',
-                examtype: q.examtype || q.type || 'utme',
-                subject: q.subject || ''
-            };
-        },
-
-        render() {
-            const q = this.questions[this.currentIndex];
-            if (!q) return;
-
-            const optionLabels = { a: 'A', b: 'B', c: 'C', d: 'D', e: 'E' };
-            const optionKeys = Object.keys(q.options).filter(k => q.options[k]);
-            const userAnswer = this.answers[this.currentIndex];
-
-            let html = `
-                <div class="question-card" data-index="${this.currentIndex}">
-                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
-                        <span class="question-number">Question ${this.currentIndex + 1} of ${this.questions.length}</span>
-                        ${q.year ? `<span class="subject-badge">${q.year}</span>` : ''}
-                        ${q.examtype ? `<span class="subject-badge">${q.examtype.toUpperCase()}</span>` : ''}
-                    </div>
-                    <div class="question-text">${this.escapeHtml(q.question)}</div>
-                    <div class="options-list">
-            `;
-
-            optionKeys.forEach(key => {
-                const label = optionLabels[key] || key.toUpperCase();
-                let extraClass = '';
+                html += `</div>`;
 
                 if (this.submitted) {
-                    if (key === q.answer) extraClass = 'correct';
-                    else if (key === userAnswer && key !== q.answer) extraClass = 'wrong';
-                } else if (key === userAnswer) {
-                    extraClass = 'selected';
+                    const correct = picked === q.answer;
+                    html += `
+                        <div class="explanation-box show">
+                            <h4>${correct ? '✅ Correct!' : picked ? '❌ Incorrect' : '⏭️ Skipped'}</h4>
+                            <p><strong>Correct Answer:</strong> ${labels[q.answer] || q.answer}</p>
+                            ${q.explanation ? `<p><strong>Explanation:</strong> ${this.escapeHtml(q.explanation)}</p>` : ''}
+                        </div>
+                    `;
                 }
 
-                html += `
-                    <label class="option-label ${extraClass}" 
-                           onclick="${this.submitted ? '' : `pastQuestions.select('${key}')`}"
-                           style="${this.submitted ? 'cursor: default;' : ''}">
-                        <input type="radio" name="q${this.currentIndex}" value="${key}" 
-                            ${key === userAnswer ? 'checked' : ''} 
-                            ${this.submitted ? 'disabled' : ''}>
-                        <span><strong>${label}.</strong> ${this.escapeHtml(q.options[key])}</span>
-                    </label>
+                html += `</div>`;
+                this.$questions.innerHTML = html;
+
+                // Attach click handlers for non-submitted state
+                if (!this.submitted) {
+                    this.$questions.querySelectorAll('.option-label').forEach((el, idx) => {
+                        const key = keys[idx];
+                        el.addEventListener('click', () => this.select(key));
+                    });
+                }
+
+                this.updateNav();
+            },
+
+            select(key) {
+                if (this.submitted) return;
+                this.answers[this.currentIndex] = key;
+                // Re-render to show selection styling
+                this.render();
+            },
+
+            prev() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.render();
+                    this.updateProgress();
+                }
+            },
+
+            next() {
+                if (this.currentIndex < this.questions.length - 1) {
+                    this.currentIndex++;
+                    this.render();
+                    this.updateProgress();
+                }
+            },
+
+            updateNav() {
+                this.$prev.disabled = this.currentIndex === 0;
+                this.$next.style.display   = this.currentIndex === this.questions.length - 1 ? 'none' : 'inline-block';
+                this.$submit.style.display = this.currentIndex === this.questions.length - 1 ? 'inline-block' : 'none';
+                this.$counter.textContent = `${this.currentIndex + 1} / ${this.questions.length}`;
+            },
+
+            updateProgress() {
+                const pct = ((this.currentIndex + 1) / this.questions.length) * 100;
+                this.$progress.style.width = pct + '%';
+            },
+
+            // ─── Submit & Results ───
+            submit() {
+                this.submitted = true;
+                let correct = 0, answered = 0;
+                this.questions.forEach((q, i) => {
+                    if (this.answers[i]) answered++;
+                    if (this.answers[i] === q.answer) correct++;
+                });
+
+                const total   = this.questions.length;
+                const percent = Math.round((correct / total) * 100);
+                const skipped = total - answered;
+
+                this.$list.style.display    = 'none';
+                this.$results.style.display = 'block';
+
+                document.getElementById('pastqScorePercent').textContent = percent + '%';
+                document.getElementById('pastqScoreDetail').textContent = `${correct} / ${total} correct • ${skipped} skipped`;
+
+                document.getElementById('pastqBreakdown').innerHTML = `
+                    <p style="color:#8892b0;">
+                        <strong style="color:#ccd6f6;">${this.sessionMeta.subjectName}</strong>
+                        ${this.sessionMeta.year ? `• ${this.sessionMeta.year}` : ''}
+                        • ${total} questions
+                    </p>
                 `;
-            });
 
-            html += `</div>`;
+                this.renderReview();
+                this.saveToHistory({ correct, total, percent, skipped, answered });
+                this.updateUserStats(correct, total);
+            },
 
-            if (this.submitted) {
-                const isCorrect = userAnswer === q.answer;
-                html += `
-                    <div class="explanation-box show">
-                        <h4>${isCorrect ? '✅ Correct!' : userAnswer ? '❌ Incorrect' : '⏭️ Skipped'}</h4>
-                        <p><strong>Correct Answer:</strong> ${optionLabels[q.answer] || q.answer}</p>
-                        ${q.explanation ? `<p><strong>Explanation:</strong> ${this.escapeHtml(q.explanation)}</p>` : ''}
-                    </div>
-                `;
-            }
+            renderReview() {
+                const labels = { a:'A', b:'B', c:'C', d:'D', e:'E' };
+                let html = '<h3 style="margin-bottom:1rem;color:#ccd6f6;">Review All Questions</h3>';
 
-            html += `</div>`;
-            this.$questions.innerHTML = html;
-            this.updateNav();
-        },
+                this.questions.forEach((q, i) => {
+                    const ua = this.answers[i];
+                    const ca = q.answer;
+                    const isCorrect = ua === ca;
+                    const isSkipped = !ua;
+                    let cardClass = 'review-card';
+                    if (isCorrect) cardClass += ' correct-review';
+                    else if (isSkipped) cardClass += ' skipped-review';
+                    else cardClass += ' wrong-review';
 
-        select(key) {
-            if (this.submitted) return;
-            this.answers[this.currentIndex] = key;
-            document.querySelectorAll('.option-label').forEach(el => el.classList.remove('selected'));
-            const clicked = event.currentTarget;
-            if (clicked) clicked.classList.add('selected');
-        },
+                    html += `
+                        <div class="question-card ${cardClass}">
+                            <span class="question-number">
+                                ${isCorrect ? '✅' : isSkipped ? '⏭️' : '❌'} Q${i + 1}
+                            </span>
+                            <div class="question-text" style="font-size:0.95rem;">${this.escapeHtml(q.question)}</div>
+                            <p style="color:#8892b0;font-size:0.85rem;margin-top:0.5rem;">
+                                Your answer:
+                                <strong style="color:${isCorrect ? '#22c55e' : isSkipped ? '#8892b0' : '#ef4444'};">
+                                    ${ua ? (labels[ua] || ua) : 'Skipped'}
+                                </strong>
+                                | Correct:
+                                <strong style="color:#22c55e;">${labels[ca] || ca}</strong>
+                            </p>
+                            ${q.explanation ? `<p style="color:#64ffda;font-size:0.8rem;margin-top:0.5rem;">💡 ${this.escapeHtml(q.explanation.substring(0,180))}${q.explanation.length>180?'...':''}</p>` : ''}
+                        </div>
+                    `;
+                });
 
-        prev() {
-            if (this.currentIndex > 0) {
-                this.currentIndex--;
+                this.$review.innerHTML = html;
+            },
+
+            saveToHistory(data) {
+                const history = JSON.parse(localStorage.getItem('jambmax_pastq_history') || '[]');
+                history.unshift({
+                    ...data,
+                    subject: this.sessionMeta.subjectName,
+                    year: this.sessionMeta.year || 'All Years',
+                    date: new Date().toISOString(),
+                    type: 'past-questions'
+                });
+                localStorage.setItem('jambmax_pastq_history', JSON.stringify(history.slice(0, 100)));
+            },
+
+            updateUserStats(correct, total) {
+                const xpEarned = Math.round((correct / total) * 50);
+                const currentXP = parseInt(localStorage.getItem('jambmax_xp') || '0');
+                localStorage.setItem('jambmax_xp', currentXP + xpEarned);
+
+                const solved = parseInt(localStorage.getItem('jambmax_questions_solved') || '0');
+                localStorage.setItem('jambmax_questions_solved', solved + total);
+
+                this.updateStreak();
+
+                // Notify global app if present
+                if (typeof jmApp !== 'undefined' && jmApp.updateStats) jmApp.updateStats();
+                this.showToast(`+${xpEarned} XP earned!`);
+            },
+
+            updateStreak() {
+                const today = new Date().toDateString();
+                const last  = localStorage.getItem('jambmax_last_study');
+                let streak  = parseInt(localStorage.getItem('jambmax_streak') || '0');
+                if (last !== today) {
+                    const yest = new Date(); yest.setDate(yest.getDate() - 1);
+                    streak = (last === yest.toDateString()) ? streak + 1 : 1;
+                    localStorage.setItem('jambmax_streak', streak);
+                    localStorage.setItem('jambmax_last_study', today);
+                }
+            },
+
+            restart() {
+                this.answers = {};
+                this.submitted = false;
+                this.currentIndex = 0;
+                this.$results.style.display = 'none';
+                this.$list.style.display = 'block';
                 this.render();
                 this.updateProgress();
-            }
-        },
+            },
 
-        next() {
-            if (this.currentIndex < this.questions.length - 1) {
-                this.currentIndex++;
-                this.render();
-                this.updateProgress();
-            }
-        },
+            newSession() {
+                this.questions = [];
+                this.answers = {};
+                this.submitted = false;
+                this.currentIndex = 0;
+                this.sessionMeta = {};
+                this.$results.style.display = 'none';
+                this.$list.style.display = 'none';
+                this.$empty.style.display = 'block';
+                this.$subject.value = '';
+                this.$year.value = '';
+                this.$loadBtn.disabled = true;
+                this.$year.disabled = true;
+            },
 
-        updateNav() {
-            this.$prev.disabled = this.currentIndex === 0;
-            this.$next.style.display = this.currentIndex === this.questions.length - 1 ? 'none' : 'inline-block';
-            this.$submit.style.display = this.currentIndex === this.questions.length - 1 ? 'inline-block' : 'none';
-            this.$counter.textContent = `${this.currentIndex + 1} / ${this.questions.length}`;
-        },
+            // ─── Offline Download ───
+            async downloadForOffline(subject, year, count) {
+                this.showToast(`Downloading ${this.SUBJECTS[subject]} ${year || 'All'}…`);
+                const questions = await this.fetchFromAPI(subject, year, count);
+                if (questions) this.showToast(`${this.SUBJECTS[subject]} cached!`);
+                return questions;
+            },
 
-        updateProgress() {
-            const pct = ((this.currentIndex + 1) / this.questions.length) * 100;
-            this.$progress.style.width = pct + '%';
-        },
-
-        submit() {
-            this.submitted = true;
-            let correct = 0, answered = 0;
-
-            this.questions.forEach((q, i) => {
-                if (this.answers[i]) answered++;
-                if (this.answers[i] === q.answer) correct++;
-            });
-
-            const total = this.questions.length;
-            const percent = Math.round((correct / total) * 100);
-            const skipped = total - answered;
-
-            this.$list.style.display = 'none';
-            this.$results.style.display = 'block';
-
-            document.getElementById('pastqScorePercent').textContent = percent + '%';
-            document.getElementById('pastqScoreDetail').textContent = `${correct} / ${total} correct • ${skipped} skipped`;
-
-            document.getElementById('pastqBreakdown').innerHTML = `
-                <p style="color: #8892b0;">
-                    <strong style="color: #ccd6f6;">${this.sessionMeta.subjectName}</strong> 
-                    ${this.sessionMeta.year ? `• ${this.sessionMeta.year}` : ''} 
-                    • ${total} questions
-                </p>
-            `;
-
-            this.renderReview();
-            this.saveToHistory({ correct, total, percent, skipped, answered });
-            this.updateUserStats(correct, total);
-        },
-
-        renderReview() {
-            const optionLabels = { a: 'A', b: 'B', c: 'C', d: 'D', e: 'E' };
-            let html = '<h3 style="margin-bottom: 1rem; color: #ccd6f6;">Review All Questions</h3>';
-
-            this.questions.forEach((q, i) => {
-                const userAns = this.answers[i];
-                const correctAns = q.answer;
-                const isCorrect = userAns === correctAns;
-                const isSkipped = !userAns;
-
-                html += `
-                    <div class="question-card" style="opacity: ${isCorrect ? '0.7' : '1'};">
-                        <span class="question-number">${isCorrect ? '✅' : isSkipped ? '⏭️' : '❌'} Q${i + 1}</span>
-                        <div class="question-text" style="font-size: 0.95rem;">${this.escapeHtml(q.question)}</div>
-                        <p style="color: #8892b0; font-size: 0.85rem; margin-top: 0.5rem;">
-                            Your answer: <strong style="color: ${isCorrect ? '#22c55e' : isSkipped ? '#8892b0' : '#ef4444'};">
-                                ${userAns ? (optionLabels[userAns] || userAns) : 'Skipped'}
-                            </strong> | 
-                            Correct: <strong style="color: #22c55e;">${optionLabels[correctAns] || correctAns}</strong>
-                        </p>
-                        ${q.explanation ? `<p style="color: #64ffda; font-size: 0.8rem; margin-top: 0.5rem;">💡 ${this.escapeHtml(q.explanation.substring(0, 150))}${q.explanation.length > 150 ? '...' : ''}</p>` : ''}
-                    </div>
-                `;
-            });
-
-            this.$review.innerHTML = html;
-        },
-
-        saveToHistory(data) {
-            const history = JSON.parse(localStorage.getItem('jambmax_pastq_history') || '[]');
-            history.unshift({
-                ...data,
-                subject: this.sessionMeta.subjectName,
-                year: this.sessionMeta.year || 'All Years',
-                date: new Date().toISOString(),
-                type: 'past-questions'
-            });
-            localStorage.setItem('jambmax_pastq_history', JSON.stringify(history.slice(0, 100)));
-        },
-
-        updateUserStats(correct, total) {
-            const xpEarned = Math.round((correct / total) * 50);
-            const currentXP = parseInt(localStorage.getItem('jambmax_xp') || '0');
-            localStorage.setItem('jambmax_xp', currentXP + xpEarned);
-
-            const solved = parseInt(localStorage.getItem('jambmax_questions_solved') || '0');
-            localStorage.setItem('jambmax_questions_solved', solved + total);
-
-            this.updateStreak();
-
-            if (typeof jmApp !== 'undefined' && jmApp.updateStats) jmApp.updateStats();
-            this.showToast(`+${xpEarned} XP earned!`);
-        },
-
-        updateStreak() {
-            const today = new Date().toDateString();
-            const lastStudy = localStorage.getItem('jambmax_last_study');
-            let streak = parseInt(localStorage.getItem('jambmax_streak') || '0');
-
-            if (lastStudy !== today) {
-                const yesterday = new Date();
-                yesterday.setDate(yesterday.getDate() - 1);
-
-                if (lastStudy === yesterday.toDateString()) streak++;
-                else streak = 1;
-
-                localStorage.setItem('jambmax_streak', streak);
-                localStorage.setItem('jambmax_last_study', today);
-            }
-        },
-
-        restart() {
-            this.answers = {};
-            this.submitted = false;
-            this.currentIndex = 0;
-            this.$results.style.display = 'none';
-            this.$list.style.display = 'block';
-            this.render();
-            this.updateProgress();
-        },
-
-        newSession() {
-            this.questions = [];
-            this.answers = {};
-            this.submitted = false;
-            this.currentIndex = 0;
-            this.sessionMeta = {};
-
-            this.$results.style.display = 'none';
-            this.$list.style.display = 'none';
-            this.$empty.style.display = 'block';
-
-            this.$subject.value = '';
-            this.$year.value = '';
-            this.$loadBtn.disabled = true;
-            this.$year.disabled = true;
-        },
-
-        async downloadForOffline(subject, year, count) {
-            if (!this.ACCESS_TOKEN) { 
-                this.showToast('Please add your API token first'); 
-                return; 
-            }
-            this.showToast(`Downloading ${this.SUBJECTS[subject]} questions...`);
-            const questions = await this.fetchFromAPI(subject, year, count);
-            if (questions) this.showToast(`${this.SUBJECTS[subject]} cached for offline!`);
-            return questions;
-        },
-
-        async downloadAllOffline() {
-            if (!this.ACCESS_TOKEN) {
-                this.showToast('Please add your API token first');
-                this.renderTokenPrompt();
-                return;
-            }
-
-            const popularSubjects = ['english', 'mathematics', 'physics', 'chemistry', 'biology'];
-            const years = ['2010', '2011', '2012', '2013'];
-
-            this.showToast('Starting offline download... This may take a moment.');
-
-            for (const subject of popularSubjects) {
-                for (const year of years) {
-                    try {
-                        await this.downloadForOffline(subject, year, 20);
-                        await new Promise(r => setTimeout(r, 1500));
-                    } catch (e) {
-                        console.warn(`Failed to cache ${subject} ${year}:`, e);
+            async downloadAllOffline() {
+                const subjects = ['english', 'mathematics', 'physics', 'chemistry', 'biology'];
+                const years    = ['2010','2011','2012','2013'];
+                this.showToast('Starting bulk offline download…');
+                for (const s of subjects) {
+                    for (const y of years) {
+                        try {
+                            await this.downloadForOffline(s, y, 20);
+                            await new Promise(r => setTimeout(r, 1200)); // rate limit
+                        } catch(e) { console.warn('Cache fail', s, y, e); }
                     }
                 }
+                this.showToast('Offline download complete!');
+                this.loadCachedCount();
+            },
+
+            // ─── Utilities ───
+            escapeHtml(text) {
+                if (!text) return '';
+                const d = document.createElement('div');
+                d.textContent = text;
+                return d.innerHTML;
+            },
+
+            showToast(msg) {
+                const toast = document.getElementById('toast');
+                if (toast) {
+                    toast.textContent = msg;
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 3000);
+                } else {
+                    console.log('[Toast]', msg);
+                }
             }
+        };
 
-            this.showToast('Offline download complete!');
-            this.loadCachedCount();
-        },
-
-        escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        },
-
-        // Fallback toast since app.js might not load properly
-        showToast(message) {
-            const toast = document.getElementById('toast');
-            if (toast) {
-                toast.textContent = message;
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 3000);
-            } else {
-                console.log('[Toast]', message);
-            }
+        // ─── Bootstrap ───
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => pastQuestions.init());
+        } else {
+            pastQuestions.init();
         }
-    };
 
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => pastQuestions.init());
-    } else {
-        pastQuestions.init();
-    }
+        // Expose to global for inline onclick fallbacks if any
+        window.pastQuestions = pastQuestions;
+    })();
     </script>
 
-    <!-- Load remaining app scripts -->
+    <!-- App scripts (optional, for shared nav/auth) -->
     <script src="../js/db.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/app.js"></script>
