@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Notes - JAMB MAX</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        /* Study Module Styles */
+        .study-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 0;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* Subject Sidebar */
+        .study-sidebar {
+            background: var(--navy-light);
+            border-right: 1px solid var(--navy-lighter);
+            overflow-y: auto;
+            max-height: calc(100vh - 60px);
+            position: sticky;
+            top: 60px;
+        }
+
+        .study-sidebar-header {
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--navy-lighter);
+        }
+
+        .study-sidebar-header h3 {
+            color: var(--gold);
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .study-sidebar-header p {
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+
+        .subject-select {
+            width: 100%;
+            padding: 0.6rem;
+            background: var(--navy);
+            border: 1px solid var(--navy-lighter);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 0.9rem;
+            margin-top: 0.8rem;
+            cursor: pointer;
+        }
+
+        .subject-select:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .topic-list {
+            padding: 0.5rem 0;
+        }
+
+        .topic-item {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.8rem 1.2rem;
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            font-size: 0.88rem;
+        }
+
+        .topic-item:hover {
+            background: rgba(255, 215, 0, 0.05);
+            color: var(--white);
+        }
+
+        .topic-item.active {
+            background: rgba(255, 215, 0, 0.1);
+            color: var(--gold);
+            border-left-color: var(--gold);
+        }
+
+        .topic-item.completed {
+            color: var(--green);
+        }
+
+        .topic-item.completed::after {
+            content: "✓";
+            margin-left: auto;
+            font-size: 0.8rem;
+        }
+
+        .topic-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--navy-lighter);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .topic-item.active .topic-num {
+            background: var(--gold);
+            color: var(--navy);
+        }
+
+        /* Content Area */
+        .study-content {
+            padding: 2rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 60px);
+        }
+
+        .topic-view {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .topic-view-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .topic-view-title {
+            font-size: 1.6rem;
+            color: var(--gold);
+        }
+
+        .topic-view-actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* Notes Editor */
+        .notes-editor {
+            background: var(--navy-light);
+            border: 1px solid var(--navy-lighter);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .notes-toolbar {
+            display: flex;
+            gap: 0.3rem;
+            padding: 0.6rem 1rem;
+            background: var(--navy);
+            border-bottom: 1px solid var(--navy-lighter);
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 0.3rem 0.6rem;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .toolbar-btn:hover {
+            background: var(--navy-lighter);
+            color: var(--white);
+        }
+
+        .toolbar-btn.active {
+            background: rgba(255, 215, 0, 0.15);
+            color: var(--gold);
+            border-color: var(--gold-dim);
+        }
+
+        .notes-area {
+            min-height: 300px;
+            padding: 1.2rem;
+            color: var(--white);
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .notes-area:focus {
+            outline: none;
+        }
+
+        .notes-area p { margin-bottom: 0.8rem; }
+        .notes-area ul, .notes-area ol { padding-left: 1.5rem; margin-bottom: 0.8rem; }
+        .notes-area li { margin-bottom: 0.3rem; }
+        .notes-area h3 { color: var(--gold); margin: 1rem 0 0.5rem; font-size: 1.1rem; }
+        .notes-area h4 { color: var(--white); margin: 0.8rem 0 0.4rem; font-size: 1rem; }
+        .notes-area blockquote {
+            border-left: 3px solid var(--gold);
+            padding-left: 1rem;
+            margin: 0.8rem 0;
+            color: var(--gray);
+            font-style: italic;
+        }
+        .notes-area code {
+            background: var(--navy-lighter);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        /* Section Cards */
+        .section-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-card {
+            background: var(--navy-light);
+            border: 1px solid var(--navy-lighter);
+            border-radius: 10px;
+            padding: 1.2rem;
+        }
+
+        .section-card h4 {
+            color: var(--gold);
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .section-card .editable-mini {
+            min-height: 80px;
+            padding: 0.8rem;
+            background: var(--navy);
+            border: 1px dashed var(--navy-lighter);
+            border-radius: 6px;
+            font-size: 0.88rem;
+            color: var(--white);
+            line-height: 1.7;
+        }
+
+        .section-card .editable-mini:focus {
+            outline: none;
+            border-color: var(--gold);
+            border-style: solid;
+        }
+
+        .section-card .editable-mini em {
+            color: var(--gray);
+        }
+
+        /* Empty State */
+        .empty-topic {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray);
+        }
+
+        .empty-topic-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-topic h2 {
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .study-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .study-sidebar {
+                max-height: 50vh;
+                position: relative;
+                top: 0;
+                border-right: none;
+                border-bottom: 1px solid var(--navy-lighter);
+            }
+
+            .study-content {
+                max-height: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .study-content {
+                padding: 1rem;
+            }
+
+            .topic-view-title {
+                font-size: 1.2rem;
+            }
+
+            .section-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div id="app">
+        <!-- Your Existing Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">JAMB<span>MAX</span></a>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">
+                    <span class="nav-icon">🏠</span> Dashboard
+                </a>
+                <a href="study.html" class="nav-item active">
+                    <span class="nav-icon">📖</span> Study Notes
+                </a>
+                <!-- Add your other nav items here -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <div class="top-bar-right">
+                    <span class="xp-badge">⭐ <span id="xp-display">0</span> XP</span>
+                    <span class="streak-badge">🔥 <span id="streak-display">0</span> Days</span>
+                </div>
+            </header>
+
+            <div class="study-layout">
+                <!-- Topic Sidebar -->
+                <aside class="study-sidebar">
+                    <div class="study-sidebar-header">
+                        <h3>📚 Study Notes</h3>
+                        <p>JAMB Syllabus Coverage</p>
+                        <select class="subject-select" id="subjectSelect" onchange="loadSubject(this.value)">
+                            <option value="mathematics">📐 Mathematics (5 topics)</option>
+                            <option value="chemistry">⚗️ Chemistry (15 topics)</option>
+                            <option value="physics">⚡ Physics (37 topics)</option>
+                            <option value="biology">🧬 Biology (13 topics)</option>
+                            <option value="english">📚 Use of English (9 topics)</option>
+                        </select>
+                    </div>
+                    <div class="topic-list" id="topicList">
+                        <!-- Topics injected by JS -->
+                    </div>
+                </aside>
+
+                <!-- Content Area -->
+                <div class="study-content">
+                    <div class="topic-view" id="topicView">
+                        <div class="empty-topic">
+                            <div class="empty-topic-icon">📖</div>
+                            <h2>Select a Topic</h2>
+                            <p>Choose a subject and topic from the sidebar to start studying.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+<script>
+// JAMB Syllabus Data
+const syllabus = {
+    mathematics: {
+        icon: "📐",
+        topics: [
+            "Number and Numeration",
+            "Algebra", 
+            "Geometry and Trigonometry",
+            "Calculus",
+            "Statistics"
+        ]
+    },
+    chemistry: {
+        icon: "⚗️",
+        topics: [
+            "Separation of Mixtures",
+            "Chemical Combination",
+            "Kinetic Theory of Matter and Gas Laws",
+            "Atomic Structure and Bonding",
+            "Air",
+            "Water",
+            "Acids, Bases and Salts",
+            "Oxidation and Reduction",
+            "Electrolysis",
+            "Energy Changes",
+            "Rates of Reaction and Chemical Equilibrium",
+            "Non-metals and Their Compounds",
+            "Metals and Their Compounds",
+            "Organic Compounds",
+            "Chemistry and Industry"
+        ]
+    },
+    physics: {
+        icon: "⚡",
+        topics: [
+            "Measurements and Units",
+            "Scalars and Vectors",
+            "Motion",
+            "Equilibrium of Forces",
+            "Work, Energy and Power",
+            "Friction",
+            "Simple Machines",
+            "Elasticity",
+            "Pressure",
+            "Liquids at Rest",
+            "Temperature and Its Measurement",
+            "Thermal Expansion",
+            "Gas Laws",
+            "Quantity of Heat",
+            "Change of State",
+            "Vapours",
+            "Structure of Matter and Kinetic Theory",
+            "Heat Transfer",
+            "Waves",
+            "Propagation of Sound Waves",
+            "Characteristics of Sound Waves",
+            "Light Energy",
+            "Reflection of Light at Plane and Curved Surfaces",
+            "Refraction of Light Through Plane and Curved Surfaces",
+            "Optical Instruments",
+            "Electrostatics",
+            "Capacitors",
+            "Electric Cells",
+            "Current Electricity",
+            "Electrical Energy and Power",
+            "Magnets and Magnetic Fields",
+            "Force on a Current-Carrying Conductor in a Magnetic Field",
+            "Electromagnetic Induction",
+            "Simple A.C. Circuits",
+            "Conduction of Electricity Through Liquids and Gases",
+            "Radioactivity and Nuclear Physics",
+            "Atomic Models and Electronic Structure"
+        ]
+    },
+    biology: {
+        icon: "🧬",
+        topics: [
+            "The Living World",
+            "Evolution Among Living Things",
+            "Organization of Life",
+            "Diversity of Living Things",
+            "Cell Biology",
+            "Plant Physiology",
+            "Animal Physiology",
+            "Reproduction",
+            "Growth",
+            "Genetics",
+            "Ecology",
+            "Conservation of Natural Resources",
+            "Variation and Inheritance"
+        ]
+    },
+    english: {
+        icon: "📚",
+        topics: [
+            "Comprehension / Summary",
+            "Lexis and Structure",
+            "Oral Forms",
+            "Essay Writing",
+            "Figures of Speech",
+            "Vocabulary Development",
+            "Register and Diction",
+            "Sentence Structure",
+            "Punctuation and Spelling"
+        ]
+    }
+};
+
+let currentSubject = "mathematics";
+let currentTopicIndex = 0;
+
+// Load subject topics into sidebar
+function loadSubject(subject) {
+    currentSubject = subject;
+    currentTopicIndex = 0;
+    const data = syllabus[subject];
+    const list = document.getElementById("topicList");
+
+    list.innerHTML = data.topics.map((topic, i) => {
+        const key = `${subject}_topic_${i}`;
+        const hasNotes = localStorage.getItem(key + "_notes");
+        const isCompleted = localStorage.getItem(key + "_completed") === "true";
+        return `
+            <div class="topic-item ${i === 0 ? 'active' : ''} ${isCompleted ? 'completed' : ''}" 
+                 onclick="selectTopic(${i})" data-index="${i}">
+                <span class="topic-num">${i + 1}</span>
+                <span class="topic-name">${topic}</span>
+            </div>
+        `;
+    }).join("");
+
+    selectTopic(0);
+}
+
+// Select a topic
+function selectTopic(index) {
+    currentTopicIndex = index;
+    const data = syllabus[currentSubject];
+    const topic = data.topics[index];
+    const key = `${currentSubject}_topic_${index}`;
+
+    // Update sidebar active state
+    document.querySelectorAll(".topic-item").forEach((el, i) => {
+        el.classList.toggle("active", i === index);
+    });
+
+    // Load saved notes
+    const savedNotes = localStorage.getItem(key + "_notes") || "";
+    const savedKeyConcepts = localStorage.getItem(key + "_keyconcepts") || "";
+    const savedFormulas = localStorage.getItem(key + "_formulas") || "";
+    const savedExamples = localStorage.getItem(key + "_examples") || "";
+    const savedPractice = localStorage.getItem(key + "_practice") || "";
+    const isCompleted = localStorage.getItem(key + "_completed") === "true";
+
+    // Render topic view
+    document.getElementById("topicView").innerHTML = `
+        <div class="topic-view-header">
+            <h1 class="topic-view-title">${data.icon} ${topic}</h1>
+            <div class="topic-view-actions">
+                <button class="btn btn-outline btn-sm" onclick="toggleComplete()">
+                    ${isCompleted ? '✅ Completed' : '☑️ Mark Complete'}
+                </button>
+                <button class="btn btn-primary btn-sm" onclick="saveAllNotes()">
+                    💾 Save
+                </button>
+            </div>
+        </div>
+
+        <div class="notes-editor">
+            <div class="notes-toolbar">
+                <button class="toolbar-btn" onclick="formatText('bold')" title="Bold"><b>B</b></button>
+                <button class="toolbar-btn" onclick="formatText('italic')" title="Italic"><i>I</i></button>
+                <button class="toolbar-btn" onclick="formatText('underline')" title="Underline"><u>U</u></button>
+                <button class="toolbar-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">• List</button>
+                <button class="toolbar-btn" onclick="formatText('insertOrderedList')" title="Numbered List">1. List</button>
+                <button class="toolbar-btn" onclick="formatText('formatBlock', 'H3')" title="Heading">H</button>
+            </div>
+            <div class="notes-area" id="mainNotes" contenteditable="true">
+                ${savedNotes || '<p><em>Click here and start typing your notes for this topic...</em></p>'}
+            </div>
+        </div>
+
+        <div class="section-cards">
+            <div class="section-card">
+                <h4>🔑 Key Concepts</h4>
+                <div class="editable-mini" id="keyConcepts" contenteditable="true">
+                    ${savedKeyConcepts || '<em>Add key concepts, definitions, and important points...</em>'}
+                </div>
+            </div>
+            <div class="section-card">
+                <h4>📐 Formulas & Equations</h4>
+                <div class="editable-mini" id="formulas" contenteditable="true">
+                    ${savedFormulas || '<em>Add formulas, equations, and calculations...</em>'}
+                </div>
+            </div>
+            <div class="section-card">
+                <h4>💡 Worked Examples</h4>
+                <div class="editable-mini" id="examples" contenteditable="true">
+                    ${savedExamples || '<em>Add worked examples and solutions...</em>'}
+                </div>
+            </div>
+            <div class="section-card">
+                <h4>❓ Practice Questions</h4>
+                <div class="editable-mini" id="practice" contenteditable="true">
+                    ${savedPractice || '<em>Add practice questions and answers...</em>'}
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Scroll to top
+    document.querySelector(".study-content").scrollTop = 0;
+}
+
+// Format text in editor
+function formatText(command, value = null) {
+    document.execCommand(command, false, value);
+    document.getElementById("mainNotes").focus();
+}
+
+// Save all notes
+function saveAllNotes() {
+    const key = `${currentSubject}_topic_${currentTopicIndex}`;
+
+    localStorage.setItem(key + "_notes", document.getElementById("mainNotes").innerHTML);
+    localStorage.setItem(key + "_keyconcepts", document.getElementById("keyConcepts").innerHTML);
+    localStorage.setItem(key + "_formulas", document.getElementById("formulas").innerHTML);
+    localStorage.setItem(key + "_examples", document.getElementById("examples").innerHTML);
+    localStorage.setItem(key + "_practice", document.getElementById("practice").innerHTML);
+
+    showToast("Notes saved! 💾", "success");
+
+    // Add XP
+    addXP(10);
+}
+
+// Toggle complete
+function toggleComplete() {
+    const key = `${currentSubject}_topic_${currentTopicIndex}`;
+    const isCompleted = localStorage.getItem(key + "_completed") === "true";
+
+    if (!isCompleted) {
+        localStorage.setItem(key + "_completed", "true");
+        showToast("Topic completed! 🎉 +50 XP", "success");
+        addXP(50);
+    } else {
+        localStorage.setItem(key + "_completed", "false");
+    }
+
+    // Refresh UI
+    loadSubject(currentSubject);
+    selectTopic(currentTopicIndex);
+}
+
+// Add XP (integrates with your existing XP system)
+function addXP(amount) {
+    const current = parseInt(localStorage.getItem("jambmax_xp") || "0");
+    localStorage.setItem("jambmax_xp", current + amount);
+    document.getElementById("xp-display").textContent = current + amount;
+}
+
+// Show toast
+function showToast(message, type) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.className = `toast ${type} show`;
+    setTimeout(() => toast.classList.remove("show"), 3000);
+}
+
+// Toggle sidebar (your existing function)
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("open");
+}
+
+// Auto-save
+let autoSaveTimer;
+document.addEventListener("input", function(e) {
+    if (e.target.closest(".notes-area") || e.target.closest(".editable-mini")) {
+        clearTimeout(autoSaveTimer);
+        autoSaveTimer = setTimeout(saveAllNotes, 15000);
+    }
+});
+
+// Keyboard shortcuts
+document.addEventListener("keydown", function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        saveAllNotes();
+    }
+});
+
+// Initialize
+document.addEventListener("DOMContentLoaded", function() {
+    loadSubject("mathematics");
+
+    // Load existing XP if available
+    const xp = localStorage.getItem("jambmax_xp") || "0";
+    document.getElementById("xp-display").textContent = xp;
+});
+</script>
+</body>
+</html>

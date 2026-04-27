@@ -7,6 +7,294 @@
     <meta name="theme-color" content="#0a192f">
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .study-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #233554;
+            padding-bottom: 0.5rem;
+        }
+        .study-tab {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #233554;
+            background: #112240;
+            color: #8892b0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .study-tab:hover {
+            border-color: #64ffda;
+            color: #ccd6f6;
+        }
+        .study-tab.active {
+            background: #64ffda;
+            color: #0a192f;
+            border-color: #64ffda;
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        .textbook-card {
+            background: #112240;
+            border: 1px solid #233554;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: border-color 0.2s;
+        }
+        .textbook-card:hover { border-color: #64ffda; }
+        .textbook-card h4 { color: #64ffda; margin-bottom: 0.5rem; font-size: 1rem; }
+        .textbook-card p { color: #a8b2d1; font-size: 0.9rem; line-height: 1.5; }
+        .textbook-card .author { color: #8892b0; font-size: 0.8rem; margin-top: 0.25rem; }
+        .textbook-tag {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            background: #233554;
+            color: #64ffda;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .novel-hero {
+            background: linear-gradient(135deg, #112240 0%, #0a192f 100%);
+            border: 2px solid #64ffda;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .novel-hero h3 { color: #64ffda; font-size: 1.3rem; margin-bottom: 0.5rem; }
+        .novel-hero .novel-title { font-size: 1.6rem; color: #ccd6f6; font-weight: 700; margin: 0.5rem 0; }
+        .novel-hero .novel-author { color: #8892b0; font-size: 1rem; }
+        .novel-hero .badge {
+            display: inline-block;
+            background: #64ffda;
+            color: #0a192f;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-top: 1rem;
+        }
+
+        .novel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .novel-card {
+            background: #112240;
+            border: 1px solid #233554;
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s;
+        }
+        .novel-card:hover { border-color: #64ffda; transform: translateY(-2px); }
+        .novel-card .category {
+            font-size: 0.75rem;
+            color: #64ffda;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+        .novel-card h4 { color: #ccd6f6; font-size: 1.05rem; margin-bottom: 0.25rem; }
+        .novel-card .author { color: #8892b0; font-size: 0.85rem; }
+        .novel-card .type-tag {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            background: rgba(100,255,218,0.1);
+            color: #64ffda;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-top: 0.5rem;
+        }
+
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .subject-chip {
+            padding: 0.75rem;
+            background: #112240;
+            border: 1px solid #233554;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #8892b0;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .subject-chip:hover { border-color: #64ffda; color: #ccd6f6; }
+        .subject-chip.active { background: #64ffda; color: #0a192f; border-color: #64ffda; }
+
+        .study-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .filter-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #8892b0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .form-select {
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid #233554;
+            background: #112240;
+            color: #ccd6f6;
+            font-size: 0.95rem;
+        }
+        .form-select:focus { outline: none; border-color: #64ffda; }
+
+        .question-card {
+            background: #112240;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid #233554;
+        }
+        .question-number {
+            display: inline-block;
+            background: #64ffda;
+            color: #0a192f;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 0.75rem;
+        }
+        .question-text {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #ccd6f6;
+            margin-bottom: 1rem;
+        }
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: #0a192f;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .option-label:hover { border-color: #64ffda; }
+        .option-label.selected { border-color: #64ffda; background: rgba(100, 255, 218, 0.1); }
+        .option-label.correct { border-color: #22c55e; background: rgba(34, 197, 94, 0.15); }
+        .option-label.wrong { border-color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #233554;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #64ffda;
+            transition: width 0.3s ease;
+        }
+
+        .study-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #233554;
+        }
+
+        .results-card {
+            background: #112240;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid #233554;
+        }
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 4px solid #64ffda;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 1.5rem auto;
+        }
+        .score-circle span { font-size: 2.2rem; font-weight: 700; color: #64ffda; }
+        .score-circle small { font-size: 0.85rem; color: #8892b0; }
+
+        .summary-box {
+            background: rgba(100,255,218,0.05);
+            border-left: 3px solid #64ffda;
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1rem 0;
+        }
+        .summary-box h4 { color: #64ffda; margin-bottom: 0.5rem; }
+        .summary-box ul {
+            color: #a8b2d1;
+            padding-left: 1.2rem;
+            line-height: 1.8;
+            font-size: 0.9rem;
+        }
+
+        .empty-state { text-align: center; padding: 3rem; }
+        .empty-state .emoji { font-size: 3rem; margin-bottom: 1rem; }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #112240;
+            color: #64ffda;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #64ffda;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+<base target="_blank">
 </head>
 <body>
     <div id="app">
@@ -16,42 +304,15 @@
                 <button class="sidebar-close" id="sidebarClose">×</button>
             </div>
             <nav class="sidebar-nav">
-                <a href="dashboard.html" class="nav-item">
-                    <span class="nav-icon">🏠</span>
-                    <span>Dashboard</span>
-                </a>
-                <a href="study.html" class="nav-item active">
-                    <span class="nav-icon">📚</span>
-                    <span>Study Room</span>
-                </a>
-                <a href="exam.html" class="nav-item">
-                    <span class="nav-icon">📝</span>
-                    <span>Mock Exam</span>
-                </a>
-                <a href="past-questions.html" class="nav-item">
-                    <span class="nav-icon">📋</span>
-                    <span>Past Questions</span>
-                </a>
-                <a href="ai.html" class="nav-item">
-                    <span class="nav-icon">🤖</span>
-                    <span>AI Tutor</span>
-                </a>
-                <a href="flashcards.html" class="nav-item">
-                    <span class="nav-icon">🎴</span>
-                    <span>Flashcards</span>
-                </a>
-                <a href="progress.html" class="nav-item">
-                    <span class="nav-icon">📊</span>
-                    <span>Progress</span>
-                </a>
-                <a href="leaderboard.html" class="nav-item">
-                    <span class="nav-icon">🏆</span>
-                    <span>Leaderboard</span>
-                </a>
-                <a href="profile.html" class="nav-item">
-                    <span class="nav-icon">👤</span>
-                    <span>Profile</span>
-                </a>
+                <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span>Dashboard</span></a>
+                <a href="study.html" class="nav-item active"><span class="nav-icon">📚</span><span>Study Room</span></a>
+                <a href="exam.html" class="nav-item"><span class="nav-icon">📝</span><span>Mock Exam</span></a>
+                <a href="past-questions.html" class="nav-item"><span class="nav-icon">📋</span><span>Past Questions</span></a>
+                <a href="ai.html" class="nav-item"><span class="nav-icon">🤖</span><span>AI Tutor</span></a>
+                <a href="flashcards.html" class="nav-item"><span class="nav-icon">🎴</span><span>Flashcards</span></a>
+                <a href="progress.html" class="nav-item"><span class="nav-icon">📊</span><span>Progress</span></a>
+                <a href="leaderboard.html" class="nav-item"><span class="nav-icon">🏆</span><span>Leaderboard</span></a>
+                <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span>Profile</span></a>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-mini" id="userMini">
@@ -79,84 +340,136 @@
                 <div class="page active" id="study-page">
                     <div class="page-header">
                         <h1>Study Room</h1>
-                        <p>Practice by subject, topic, or year</p>
+                        <p>Textbooks, novels, syllabus topics & practice</p>
                     </div>
-                    
-                    <div class="study-filters">
-                        <div class="filter-group">
-                            <label>Subject</label>
-                            <select id="studySubject" class="form-select">
-                                <option value="">All Subjects</option>
-                                <option value="english">English Language</option>
-                                <option value="mathematics">Mathematics</option>
-                                <option value="physics">Physics</option>
-                                <option value="chemistry">Chemistry</option>
-                                <option value="biology">Biology</option>
-                                <option value="government">Government</option>
-                                <option value="economics">Economics</option>
-                                <option value="literature">Literature</option>
-                                <option value="crs">CRS</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Topic</label>
-                            <select id="studyTopic" class="form-select">
-                                <option value="">All Topics</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Year</label>
-                            <select id="studyYear" class="form-select">
-                                <option value="">All Years</option>
-                                <option value="2024">2024</option>
-                                <option value="2023">2023</option>
-                                <option value="2022">2022</option>
-                                <option value="2021">2021</option>
-                                <option value="2020">2020</option>
-                                <option value="2019">2019</option>
-                                <option value="2018">2018</option>
-                                <option value="2017">2017</option>
-                                <option value="2016">2016</option>
-                                <option value="2015">2015</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Number</label>
-                            <select id="studyCount" class="form-select">
-                                <option value="5">5 Questions</option>
-                                <option value="10" selected>10 Questions</option>
-                                <option value="20">20 Questions</option>
-                                <option value="40">40 Questions</option>
-                            </select>
-                        </div>
+
+                    <div class="study-tabs">
+                        <div class="study-tab active" data-tab="practice">📝 Practice</div>
+                        <a class="study-tab"  href="../notes.html">Notes📙</a>
+                        <div class="study-tab" data-tab="novels">📚 Novels & Texts</div>
+                        <div class="study-tab" data-tab="syllabus">📋 Syllabus</div>
                     </div>
-                    
-                    <button class="btn btn-primary" onclick="study.startPractice()" style="margin-bottom: 2rem;">
-                        Start Practice
-                    </button>
-                    
-                    <div id="studyContainer" style="display: none;">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="studyProgress"></div>
-                        </div>
-                        <div class="question-container" id="studyQuestion"></div>
-                        <div class="study-controls">
-                            <button class="btn btn-outline" id="studyPrev" onclick="study.prev()">Previous</button>
-                            <button class="btn btn-primary" id="studyNext" onclick="study.next()">Next</button>
-                            <button class="btn btn-success" id="studySubmit" onclick="study.submit()" style="display: none;">Submit</button>
-                        </div>
-                    </div>
-                    
-                    <div id="studyResults" style="display: none;">
-                        <div class="results-card">
-                            <h2>Practice Complete! 🎉</h2>
-                            <div class="score-circle" id="studyScoreCircle">
-                                <span id="studyScore">0%</span>
+
+                    <!-- PRACTICE TAB -->
+                    <div class="tab-panel active" id="tab-practice">
+                        <div class="study-filters">
+                            <div class="filter-group">
+                                <label>Subject</label>
+                                <select id="studySubject" class="form-select">
+                                    <option value="">Select Subject</option>
+                                    <option value="english">English Language</option>
+                                    <option value="mathematics">Mathematics</option>
+                                    <option value="physics">Physics</option>
+                                    <option value="chemistry">Chemistry</option>
+                                    <option value="biology">Biology</option>
+                                    <option value="government">Government</option>
+                                    <option value="economics">Economics</option>
+                                    <option value="literature">Literature in English</option>
+                                    <option value="crs">CRS</option>
+                                </select>
                             </div>
-                            <div id="studyBreakdown"></div>
-                            <button class="btn btn-primary" onclick="study.restart()">Practice Again</button>
+                            <div class="filter-group">
+                                <label>Topic</label>
+                                <select id="studyTopic" class="form-select">
+                                    <option value="">All Topics</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Year</label>
+                                <select id="studyYear" class="form-select">
+                                    <option value="">All Years</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                    <option value="2021">2021</option>
+                                    <option value="2020">2020</option>
+                                    <option value="2019">2019</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2016">2016</option>
+                                    <option value="2015">2015</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Number</label>
+                                <select id="studyCount" class="form-select">
+                                    <option value="5">5 Questions</option>
+                                    <option value="10" selected>10 Questions</option>
+                                    <option value="20">20 Questions</option>
+                                    <option value="40">40 Questions</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" id="studyStartBtn" style="margin-bottom: 2rem;">
+                            Start Practice
+                        </button>
+
+                        <div id="studyEmpty" class="empty-state">
+                            <div class="emoji">🎯</div>
+                            <h3>Ready to Practice?</h3>
+                            <p style="color: #8892b0;">Select a subject and topic to start targeted practice.</p>
+                        </div>
+
+                        <div id="studyContainer" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="studyProgress"></div>
+                            </div>
+                            <div id="studyQuestion"></div>
+                            <div class="study-controls">
+                                <button class="btn btn-outline" id="studyPrev">← Previous</button>
+                                <span id="studyCounter" style="color: #8892b0; font-size: 0.9rem;">1 / 10</span>
+                                <button class="btn btn-primary" id="studyNext">Next →</button>
+                                <button class="btn btn-success" id="studySubmit" style="display: none;">Submit</button>
+                            </div>
+                        </div>
+
+                        <div id="studyResults" style="display: none;">
+                            <div class="results-card">
+                                <h2>Practice Complete! 🎉</h2>
+                                <div class="score-circle">
+                                    <span id="studyScore">0%</span>
+                                    <small id="studyScoreDetail">0 / 0 correct</small>
+                                </div>
+                                <div id="studyBreakdown"></div>
+                                <button class="btn btn-primary" id="studyRestart">Practice Again</button>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- TEXTBOOKS TAB -->
+                    <div class="tab-panel" id="tab-textbooks">
+                        <div class="subject-grid" id="textbookSubjects"></div>
+                        <div id="textbookList"></div>
+                    </div>
+
+                    <!-- NOVELS TAB -->
+                    <div class="tab-panel" id="tab-novels">
+                        <div class="novel-hero">
+                            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📖</div>
+                            <h3>JAMB 2025/2026 Use of English</h3>
+                            <div class="novel-title">The Lekki Headmaster</div>
+                            <div class="novel-author">by Kabir Alabi Garba</div>
+                            <div class="badge">OFFICIAL NOVEL</div>
+                            <div style="margin-top: 1rem; color: #8892b0; font-size: 0.9rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                                Replaces "Life Changer" by Khadijat Jalli (2024). 
+                                Cost included in ePIN registration. Themes: education, leadership, 
+                                migration ("Japa"), family & moral dilemmas.
+                            </div>
+                        </div>
+
+                        <h3 style="color: #ccd6f6; margin-bottom: 1rem;">Literature in English Texts (2025/2026)</h3>
+                        <div class="novel-grid" id="literatureTexts"></div>
+
+                        <h3 style="color: #ccd6f6; margin: 2rem 0 1rem;">Recommended Anthologies & Critical Texts</h3>
+                        <div id="anthologyList"></div>
+                    </div>
+
+                    <!-- SYLLABUS TAB -->
+                    <div class="tab-panel" id="tab-syllabus">
+                        <div class="subject-grid" id="syllabusSubjects"></div>
+                        <div id="syllabusContent"></div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -178,19 +491,674 @@
         };
         firebase.initializeApp(firebaseConfig);
     </script>
-    <script src="../data/english.js"></script>
-    <script src="../data/mathematics.js"></script>
-    <script src="../data/physics.js"></script>
-    <script src="../data/chemistry.js"></script>
-    <script src="../data/biology.js"></script>
-    <script src="../data/government.js"></script>
-    <script src="../data/economics.js"></script>
-    <script src="../data/literature.js"></script>
-    <script src="../data/crs.js"></script>
-    <script src="../js/data-loader.js"></script>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ─── DATA: JAMB Recommended Textbooks ───
+        const TEXTBOOKS = {
+            english: [
+                { title: "Comprehension and Summary for Schools and Colleges", author: "A. O. Oluikpe et al.", tag: "Comp & Summary" },
+                { title: "Countdown to English Language", author: "O. A. Olatunji et al.", tag: "Grammar" },
+                { title: "The Lexis and Structure of English", author: "O. A. Olatunji", tag: "Structure" },
+                { title: "A Handbook of English Usage", author: "J. O. O. J. Umeano", tag: "Usage" },
+                { title: "Oral English for Schools and Colleges", author: "O. O. Olatunji & A. O. Oluikpe", tag: "Oral" }
+            ],
+            mathematics: [
+                { title: "New General Mathematics for Senior Secondary Schools", author: "M. F. Macrae et al.", tag: "Core" },
+                { title: "Spectrum New Further Mathematics", author: "A. M. T. T. Tella et al.", tag: "Further" },
+                { title: "Hidden Facts in New Senior Secondary School Mathematics", author: "M. A. Otumudia", tag: "Facts" },
+                { title: "New School Mathematics for Senior Secondary Schools", author: "T. R. Moses", tag: "Core" },
+                { title: "Exam Focus Mathematics", author: "J. O. O. Umeano et al.", tag: "Exam Prep" }
+            ],
+            physics: [
+                { title: "New School Physics for Senior Secondary Schools", author: "M. W. Anyakoha", tag: "Core" },
+                { title: "Senior Secondary Physics", author: "P. N. Okeke et al.", tag: "Core" },
+                { title: "Hidden Facts in New Senior Secondary School Physics", author: "M. A. Otumudia", tag: "Facts" },
+                { title: "Essential Physics for Senior Secondary Schools", author: "Ikeokwu et al.", tag: "Core" },
+                { title: "Numerical Problems and Solutions in Physics", author: "I. A. Haliday et al.", tag: "Problems" }
+            ],
+            chemistry: [
+                { title: "New School Chemistry for Senior Secondary Schools (4th Ed.)", author: "O. Y. Ababio", tag: "Core" },
+                { title: "Senior Secondary Chemistry, Books 1-3", author: "S. T. Bajah et al.", tag: "Core" },
+                { title: "Understanding Chemistry for Schools and Colleges (Rev. Ed.)", author: "G. O. Ojokuku", tag: "Core" },
+                { title: "Essential Chemistry for Senior Secondary Schools (2nd Ed.)", author: "I. A. Odesina", tag: "Core" },
+                { title: "Countdown to WASSCE/SSCE, NECO, JME Chemistry", author: "I. O. Uche et al.", tag: "Exam Prep" }
+            ],
+            biology: [
+                { title: "Modern Biology for Senior Secondary Schools", author: "S. T. Ramalingam", tag: "Core" },
+                { title: "New School Biology for Senior Secondary Schools", author: "H. O. E. O. E. Ndu et al.", tag: "Core" },
+                { title: "Hidden Facts in New Senior Secondary School Biology", author: "M. A. Otumudia", tag: "Facts" },
+                { title: "Essential Biology for Senior Secondary Schools", author: "M. C. Michael", tag: "Core" },
+                { title: "Exam Focus Biology", author: "J. O. O. Umeano et al.", tag: "Exam Prep" }
+            ],
+            government: [
+                { title: "Essentials of Government for West Africa", author: "F. Adigwe (1985)", tag: "Core" },
+                { title: "Elements of Politics", author: "R. Anifowose & F.C. Enemuo (1999)", tag: "Core" },
+                { title: "The Substance of Politics", author: "A. Appadorai (1978)", tag: "Core" },
+                { title: "Modern Politics and Government", author: "A. R. Ball (1983)", tag: "Core" },
+                { title: "Government for Senior Secondary Schools (Books 1-3)", author: "O. Oyediran et al. (1990)", tag: "SSCE" },
+                { title: "Round-Up Government for SSCE", author: "I. Oyeneye et al. (2000)", tag: "Exam Prep" },
+                { title: "Countdown to Senior Secondary Certificate Examination: Government", author: "S. Oyovbaire et al. (2001)", tag: "Exam Prep" }
+            ],
+            economics: [
+                { title: "Economics: Exam Focus", author: "A. A. Aderinto et al. (1996)", tag: "Exam Prep" },
+                { title: "Oxford Dictionary of Economics", author: "J. Black (1997)", tag: "Reference" },
+                { title: "Economics Made Easy", author: "D. O. Eyiyere (1980)", tag: "Core" },
+                { title: "Countdown to SSCE/JME Economics", author: "F. Fajana et al. (1999)", tag: "Exam Prep" },
+                { title: "Round-up Economics", author: "A. B. Falodun et al. (1997)", tag: "Exam Prep" },
+                { title: "Modern Microeconomics", author: "A. Koutsoyiannis (1979)", tag: "University" },
+                { title: "An Introduction to Positive Economics", author: "R. G. Lipsey (1997)", tag: "University" },
+                { title: "Economics", author: "P. Samuelson & W. Nordhaus (1989)", tag: "University" },
+                { title: "New System Economics: A Senior Secondary Course", author: "E. Udu & G. A. Agu (2005)", tag: "Core" }
+            ],
+            literature: [
+                { title: "A Glossary of Literary Terms (4th Ed.)", author: "M. H. Abrams (1981)", tag: "Critical" },
+                { title: "A Dictionary of Literature", author: "O. E. Emeaba (1982)", tag: "Reference" },
+                { title: "Understanding Unseen: An Introduction to English Poetry and the English Novel", author: "M. J. Murphy (1972)", tag: "Critical" },
+                { title: "Naked Soles", author: "A. Gbemisola (2005)", tag: "Anthology" },
+                { title: "The Penguin Book of English Verse", author: "J. Hayward (ed.) (1968)", tag: "Anthology" },
+                { title: "New Poetry from Africa", author: "R. Johnson et al. (eds.) (1996)", tag: "Anthology" },
+                { title: "A Selection of African Poetry", author: "K. E. Senanu & T. Vincent (eds.) (1993)", tag: "Anthology" },
+                { title: "Poems of Black Africa", author: "W. Soyinka (ed.) (1987)", tag: "Anthology" }
+            ],
+            crs: [
+                { title: "The Holy Bible (Revised Standard Version)", author: "-", tag: "Core" },
+                { title: "Christian Religious Knowledge for Senior Secondary Schools", author: "A. O. O. I. Adigwe et al.", tag: "Core" },
+                { title: "Christian Religious Knowledge for Senior Secondary Schools (Books 1-3)", author: "I. Adeyemo et al.", tag: "Core" },
+                { title: "Exam Focus Christian Religious Knowledge", author: "A. O. O. I. Adigwe et al.", tag: "Exam Prep" },
+                { title: "Hidden Facts in New Senior Secondary School CRS", author: "M. A. Otumudia", tag: "Facts" }
+            ],
+            commerce: [
+                { title: "Commerce for Senior Secondary Schools", author: "A. O. O. I. Adigwe et al.", tag: "Core" },
+                { title: "Countdown to Commerce", author: "O. A. Olatunji et al.", tag: "Exam Prep" },
+                { title: "Commerce Textbook for Schools and Colleges", author: "M. A. Otumudia", tag: "Core" },
+                { title: "Hidden Facts in Commerce", author: "M. A. Otumudia", tag: "Facts" }
+            ],
+            accounting: [
+                { title: "Financial Accounting for Senior Secondary Schools", author: "O. A. Olatunji et al.", tag: "Core" },
+                { title: "Book-Keeping and Accounts for Senior Secondary Schools", author: "A. O. O. I. Adigwe et al.", tag: "Core" },
+                { title: "Countdown to Financial Accounting", author: "O. A. Olatunji et al.", tag: "Exam Prep" },
+                { title: "Hidden Facts in Financial Accounting", author: "M. A. Otumudia", tag: "Facts" }
+            ],
+            geography: [
+                { title: "Geography: A New Approach for Senior Secondary Schools", author: "A. O. O. I. Adigwe et al.", tag: "Core" },
+                { title: "Countdown to Geography", author: "O. A. Olatunji et al.", tag: "Exam Prep" },
+                { title: "Essential Geography for Senior Secondary Schools", author: "O. A. Okeke et al.", tag: "Core" }
+            ],
+            agriculture: [
+                { title: "Agricultural Science for Senior Secondary Schools", author: "A. O. O. I. Adigwe et al.", tag: "Core" },
+                { title: "Modern Agricultural Science for Senior Secondary Schools", author: "O. A. Olatunji et al.", tag: "Core" },
+                { title: "Countdown to Agricultural Science", author: "O. A. Olatunji et al.", tag: "Exam Prep" }
+            ]
+        };
+
+        // ─── DATA: Literature Texts ───
+        const LITERATURE_TEXTS = [
+            { title: "The Marriage of Anansewa", author: "Efua Sutherland", category: "African Drama", type: "Drama" },
+            { title: "Harvest of Corruption", author: "Frank Ogodo Ogbeche", category: "African Drama", type: "Drama" },
+            { title: "Othello", author: "William Shakespeare", category: "Non-African Drama", type: "Drama" },
+            { title: "Antony and Cleopatra", author: "William Shakespeare", category: "Non-African Drama", type: "Drama" },
+            { title: "An Inspector Calls", author: "J. B. Priestley", category: "Non-African Drama", type: "Drama" },
+            { title: "A Man for All Seasons", author: "Robert Bolt", category: "Non-African Drama", type: "Drama" },
+            { title: "Look Back in Anger", author: "John Osborne", category: "Non-African Drama", type: "Drama" },
+            { title: "Faceless", author: "Amma Darko", category: "African Prose", type: "Prose" },
+            { title: "So the Path Does Not Die", author: "Pede Hollist", category: "African Prose", type: "Prose" },
+            { title: "Redemption Road", author: "Elma Shaw", category: "African Prose", type: "Prose" },
+            { title: "Second Class Citizen", author: "Buchi Emecheta", category: "African Prose", type: "Prose" },
+            { title: "Unexpected Joy at Dawn", author: "Alex Agyei Agyiri", category: "African Prose", type: "Prose" },
+            { title: "Native Son", author: "Richard Wright", category: "Non-African Prose", type: "Prose" },
+            { title: "To Kill a Mockingbird", author: "Harper Lee", category: "Non-African Prose", type: "Prose" },
+            { title: "Path of Lucas: The Journey He Endured", author: "Susanne Bellefeuille", category: "Non-African Prose", type: "Prose" },
+            { title: "Wuthering Heights", author: "Emily Bronte", category: "Non-African Prose", type: "Prose" },
+            { title: "Vanity", author: "Birago Diop", category: "African Poetry", type: "Poetry" },
+            { title: "Ambush", author: "Gbemisola Adeoti", category: "African Poetry", type: "Poetry" },
+            { title: "Piano and Drums", author: "Gabriel Okara", category: "African Poetry", type: "Poetry" },
+            { title: "The Dining Table", author: "Gbanabam Hallowell", category: "African Poetry", type: "Poetry" },
+            { title: "The Panic of Growing Older", author: "Lenrie Peter", category: "African Poetry", type: "Poetry" },
+            { title: "The Anvil and the Hammer", author: "Kofi Awoonor", category: "African Poetry", type: "Poetry" },
+            { title: "Once Upon a Time", author: "Gabriel Okara", category: "African Poetry", type: "Poetry" },
+            { title: "New Tongue", author: "Elizabeth L. A. Kamara", category: "African Poetry", type: "Poetry" },
+            { title: "Night", author: "Wole Soyinka", category: "African Poetry", type: "Poetry" },
+            { title: "Not My Business", author: "Niyi Osundare", category: "African Poetry", type: "Poetry" },
+            { title: "Hearty Garlands", author: "S. O. H. Afriyie-Vidza", category: "African Poetry", type: "Poetry" },
+            { title: "The Breasts of the Sea", author: "Syl Cheney-Coker", category: "African Poetry", type: "Poetry" },
+            { title: "Crossing the Bar", author: "Alfred Tennyson", category: "Non-African Poetry", type: "Poetry" },
+            { title: "The Pulley", author: "George Herbert", category: "Non-African Poetry", type: "Poetry" },
+            { title: "The School Boy", author: "William Blake", category: "Non-African Poetry", type: "Poetry" },
+            { title: "The Proud King", author: "William Morris", category: "Non-African Poetry", type: "Poetry" },
+            { title: "She Walks in Beauty", author: "Lord Byron", category: "Non-African Poetry", type: "Poetry" },
+            { title: "The Stone", author: "Wilfred Wilson Gibson", category: "Non-African Poetry", type: "Poetry" },
+            { title: "The Nun's Priest's Tale", author: "Geoffrey Chaucer", category: "Non-African Poetry", type: "Poetry" },
+            { title: "The Digging", author: "Seamus Heaney", category: "Non-African Poetry", type: "Poetry" },
+            { title: "Still I Rise", author: "Maya Angelou", category: "Non-African Poetry", type: "Poetry" },
+            { title: "The Telephone Call", author: "Fleur Adcock", category: "Non-African Poetry", type: "Poetry" }
+        ];
+
+        const ANTHOLOGIES = [
+            { title: "Naked Soles", author: "A. Gbemisola (2005)", publisher: "Kraft, Ibadan" },
+            { title: "The Penguin Book of English Verse", author: "J. Hayward (ed.) (1968)", publisher: "Penguin, London" },
+            { title: "New Poetry from Africa", author: "R. Johnson et al. (eds.) (1996)", publisher: "UP Plc, Ibadan" },
+            { title: "Oxford Anthology of English Literature, Vol. II", author: "F. Kermode et al. (1964)", publisher: "OUP, London" },
+            { title: "West African Verse", author: "D. Nwoga (ed.) (1967)", publisher: "Longman, London" },
+            { title: "A Selection of African Poetry", author: "K. E. Senanu & T. Vincent (eds.) (1993)", publisher: "Longman, Lagos" },
+            { title: "Poems of Black Africa", author: "W. Soyinka (ed.) (1987)", publisher: "Heinemann, Ibadan" },
+            { title: "A Pageant of Longer Poems", author: "E. W. Parker (ed.) (1980)", publisher: "Longman, London" },
+            { title: "Of Shadows and Rainbows - Musings in Times of Covid", author: "O. Obafemi & Agoi (eds.)", publisher: "PEN Nigeria (Online)" },
+            { title: "Camouflage: Best of Contemporary Writing from Nigeria", author: "Nduke Ofiono & Odoh Diego Okenyodo (eds.)", publisher: "Mace Books, 2021" }
+        ];
+
+        const CRITICAL_TEXTS = [
+            { title: "A Glossary of Literary Terms (4th Edition)", author: "M. H. Abrams (1981)", publisher: "Holt Rinehalt and Winston, New York" },
+            { title: "A Dictionary of Literature", author: "O. E. Emeaba (1982)", publisher: "Inteks Press, Aba" },
+            { title: "Understanding Unseen: An Introduction to English Poetry and the English Novel for Overseas Students", author: "M. J. Murphy (1972)", publisher: "George Allen and Unwin Ltd." }
+        ];
+
+        // ─── DATA: Syllabus Topics ───
+        const SYLLABUS = {
+            english: [
+                "Comprehension/Summary",
+                "Lexis (Antonyms & Synonyms)",
+                "Structure (Parts of Speech)",
+                "Oral Forms (Vowels & Consonants)",
+                "Stress, Rhythm & Intonation",
+                "Figures of Speech",
+                "Sentence Structure & Types",
+                "Clause & Phrase Identification",
+                "Register (Formal vs Informal)",
+                "The Novel: The Lekki Headmaster"
+            ],
+            mathematics: [
+                "Number & Numeration",
+                "Algebra (Equations & Inequalities)",
+                "Geometry & Trigonometry",
+                "Calculus (Differentiation & Integration)",
+                "Statistics & Probability",
+                "Matrices & Determinants",
+                "Vectors",
+                "Sets & Logic",
+                "Binary Operations",
+                "Financial Mathematics"
+            ],
+            physics: [
+                "Measurements & Units",
+                "Scalars & Vectors",
+                "Kinematics (Motion)",
+                "Dynamics (Newton's Laws)",
+                "Work, Energy & Power",
+                "Heat & Temperature",
+                "Waves (Sound & Light)",
+                "Optics (Mirrors & Lenses)",
+                "Electricity & Magnetism",
+                "Modern Physics (Atomic & Nuclear)",
+                "Electronics"
+            ],
+            chemistry: [
+                "Separation of Mixtures",
+                "Atomic Structure & Bonding",
+                "Stoichiometry & Mole Concept",
+                "States of Matter (Gases, Liquids, Solids)",
+                "Energy & Chemical Reactions",
+                "Acids, Bases & Salts",
+                "Redox Reactions & Electrochemistry",
+                "Organic Chemistry (Hydrocarbons)",
+                "Chemistry of Carbon Compounds",
+                "Environmental Chemistry",
+                "Industrial Chemistry"
+            ],
+            biology: [
+                "Cell Biology (Structure & Function)",
+                "Cell Division (Mitosis & Meiosis)",
+                "Genetics & Inheritance",
+                "Evolution & Natural Selection",
+                "Ecology (Ecosystems & Food Chains)",
+                "Human Digestive System",
+                "Circulatory & Respiratory Systems",
+                "Excretory & Reproductive Systems",
+                "Nervous & Endocrine Systems",
+                "Plant Nutrition (Photosynthesis)",
+                "Microorganisms & Disease"
+            ],
+            government: [
+                "Political Concepts & Systems",
+                "Constitutional Development in Nigeria",
+                "Citizenship & Rights",
+                "Political Parties & Pressure Groups",
+                "The Electoral Process",
+                "Arms of Government (Legislature, Executive, Judiciary)",
+                "Local Government Administration",
+                "Nigerian Foreign Policy",
+                "International Organizations (UN, AU, ECOWAS)",
+                "Public Administration"
+            ],
+            economics: [
+                "Economics as a Science",
+                "Demand, Supply & Price Determination",
+                "Theory of Production",
+                "Market Structures (Perfect & Imperfect)",
+                "National Income & Accounting",
+                "Money & Banking",
+                "Public Finance (Taxation & Expenditure)",
+                "International Trade & Finance",
+                "Economic Growth & Development",
+                "Population & Labour Market",
+                "Agriculture & Industrialization"
+            ],
+            literature: [
+                "Literary Terms & Devices",
+                "Drama (Plot, Character, Setting, Theme)",
+                "Prose (Narrative Techniques, Characterization)",
+                "Poetry (Structure, Mood, Tone, Imagery)",
+                "African vs Non-African Literature",
+                "Literary Criticism & Appreciation",
+                "Shakespearean Drama",
+                "Oral Literature (Folktales, Proverbs, Myths)"
+            ],
+            crs: [
+                "Creation & the Fall of Man",
+                "The Patriarchs (Abraham, Isaac, Jacob)",
+                "The Exodus & Moses",
+                "The Kings of Israel (Saul, David, Solomon)",
+                "The Prophets (Isaiah, Jeremiah, Amos)",
+                "The Life & Ministry of Jesus",
+                "The Early Church & Apostles",
+                "Paul's Missionary Journeys",
+                "Christian Ethics & Morality",
+                "Faith, Prayer & Worship"
+            ]
+        };
+
+        // ─── PRACTICE ENGINE ───
+        const practice = {
+            questions: [],
+            currentIndex: 0,
+            answers: {},
+            submitted: false,
+
+            get $subject()  { return document.getElementById('studySubject'); },
+            get $topic()    { return document.getElementById('studyTopic'); },
+            get $year()     { return document.getElementById('studyYear'); },
+            get $count()    { return document.getElementById('studyCount'); },
+            get $startBtn() { return document.getElementById('studyStartBtn'); },
+            get $empty()    { return document.getElementById('studyEmpty'); },
+            get $container(){ return document.getElementById('studyContainer'); },
+            get $question() { return document.getElementById('studyQuestion'); },
+            get $progress() { return document.getElementById('studyProgress'); },
+            get $counter()  { return document.getElementById('studyCounter'); },
+            get $prev()     { return document.getElementById('studyPrev'); },
+            get $next()     { return document.getElementById('studyNext'); },
+            get $submit()   { return document.getElementById('studySubmit'); },
+            get $results()  { return document.getElementById('studyResults'); },
+
+            init() {
+                this.$subject.addEventListener('change', () => this.populateTopics());
+                this.$startBtn.addEventListener('click', () => this.start());
+                this.$prev.addEventListener('click', () => this.prev());
+                this.$next.addEventListener('click', () => this.next());
+                this.$submit.addEventListener('click', () => this.submit());
+                document.getElementById('studyRestart').addEventListener('click', () => this.restart());
+            },
+
+            populateTopics() {
+                const sub = this.$subject.value;
+                const $topic = this.$topic;
+                $topic.innerHTML = '<option value="">All Topics</option>';
+                if (SYLLABUS[sub]) {
+                    SYLLABUS[sub].forEach(t => {
+                        const opt = document.createElement('option');
+                        opt.value = t;
+                        opt.textContent = t;
+                        $topic.appendChild(opt);
+                    });
+                }
+            },
+
+            start() {
+                const subject = this.$subject.value;
+                if (!subject) { showToast('Select a subject first'); return; }
+                const count = parseInt(this.$count.value);
+                const topic = this.$topic.value || 'General';
+                this.questions = this.generateMockQuestions(subject, topic, count);
+                this.currentIndex = 0;
+                this.answers = {};
+                this.submitted = false;
+                this.$empty.style.display = 'none';
+                this.$results.style.display = 'none';
+                this.$container.style.display = 'block';
+                this.render();
+                this.updateProgress();
+            },
+
+            generateMockQuestions(subject, topic, count) {
+                const mocks = [];
+                const templates = {
+                    english: [
+                        { q: "Choose the word nearest in meaning to BENEVOLENT:", opts: {a:"Kind", b:"Cruel", c:"Selfish", d:"Wicked"}, ans: "a" },
+                        { q: "The expression 'He kicked the bucket' is an example of:", opts: {a:"Simile", b:"Metaphor", c:"Euphemism", d:"Hyperbole"}, ans: "c" },
+                        { q: "Identify the figure of speech: 'The wind whispered through the trees.'", opts: {a:"Personification", b:"Alliteration", c:"Onomatopoeia", d:"Irony"}, ans: "a" }
+                    ],
+                    mathematics: [
+                        { q: "If log₂ x = 5, what is the value of x?", opts: {a:"10", b:"25", c:"32", d:"64"}, ans: "c" },
+                        { q: "Solve for x: 3x + 7 = 22", opts: {a:"3", b:"5", c:"7", d:"9"}, ans: "b" },
+                        { q: "What is the derivative of x³ with respect to x?", opts: {a:"x²", b:"3x²", c:"3x", d:"x³/3"}, ans: "b" }
+                    ],
+                    physics: [
+                        { q: "What is the SI unit of force?", opts: {a:"Watt", b:"Joule", c:"Newton", d:"Pascal"}, ans: "c" },
+                        { q: "A body moving with uniform acceleration covers 20m in 2s and 40m in the next 2s. What is its acceleration?", opts: {a:"2 m/s²", b:"5 m/s²", c:"10 m/s²", d:"15 m/s²"}, ans: "b" }
+                    ],
+                    chemistry: [
+                        { q: "What is the empirical formula of benzene?", opts: {a:"CH", b:"CH₂", c:"C₂H₂", d:"C₆H₆"}, ans: "a" },
+                        { q: "Which gas is produced when zinc reacts with dilute HCl?", opts: {a:"Oxygen", b:"Hydrogen", c:"Chlorine", d:"Nitrogen"}, ans: "b" }
+                    ],
+                    biology: [
+                        { q: "Which organelle is known as the powerhouse of the cell?", opts: {a:"Nucleus", b:"Ribosome", c:"Mitochondrion", d:"Golgi body"}, ans: "c" },
+                        { q: "What is the genetic material in most organisms?", opts: {a:"RNA", b:"DNA", c:"Protein", d:"Lipid"}, ans: "b" }
+                    ],
+                    government: [
+                        { q: "Which arm of government is responsible for making laws?", opts: {a:"Executive", b:"Judiciary", c:"Legislature", d:"Bureaucracy"}, ans: "c" },
+                        { q: "Nigeria became a republic in what year?", opts: {a:"1960", b:"1963", c:"1966", d:"1979"}, ans: "b" }
+                    ],
+                    economics: [
+                        { q: "The law of demand states that, ceteris paribus:", opts: {a:"Price and demand move together", b:"Price and demand move inversely", c:"Demand is constant", d:"Supply determines demand"}, ans: "b" },
+                        { q: "GDP stands for:", opts: {a:"Gross Domestic Product", b:"General Domestic Product", c:"Gross Development Product", d:"General Development Product"}, ans: "a" }
+                    ],
+                    literature: [
+                        { q: "In 'The Marriage of Anansewa', who is the central character?", opts: {a:"Ananse", b:"Anansewa", c:"The Chief", d:"The Queen"}, ans: "b" },
+                        { q: "'Othello' is a tragedy written by:", opts: {a:"Christopher Marlowe", b:"Ben Jonson", c:"William Shakespeare", d:"John Milton"}, ans: "c" }
+                    ],
+                    crs: [
+                        { q: "Who led the Israelites out of Egypt?", opts: {a:"Abraham", b:"Moses", c:"Joshua", d:"David"}, ans: "b" },
+                        { q: "The Sermon on the Mount is found in which Gospel?", opts: {a:"Matthew", b:"Mark", c:"Luke", d:"John"}, ans: "a" }
+                    ]
+                };
+                const pool = templates[subject] || templates.english;
+                for (let i = 0; i < count; i++) {
+                    const base = pool[i % pool.length];
+                    mocks.push({
+                        id: `mock_${subject}_${i}`,
+                        question: `[${topic}] ${base.q}`,
+                        options: base.opts,
+                        answer: base.ans,
+                        explanation: `Correct answer is ${base.ans.toUpperCase()}. Study ${topic} in your JAMB syllabus.`,
+                        year: '2025',
+                        examtype: 'study-mode'
+                    });
+                }
+                return mocks;
+            },
+
+            render() {
+                const q = this.questions[this.currentIndex];
+                if (!q) return;
+                const labels = {a:'A', b:'B', c:'C', d:'D', e:'E'};
+                const keys = Object.keys(q.options);
+                const picked = this.answers[this.currentIndex];
+                let html = `
+                    <div class="question-card">
+                        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+                            <span class="question-number">Question ${this.currentIndex + 1} of ${this.questions.length}</span>
+                            <span class="subject-badge">${q.examtype.toUpperCase()}</span>
+                        </div>
+                        <div class="question-text">${escapeHtml(q.question)}</div>
+                        <div class="options-list">
+                `;
+                keys.forEach(key => {
+                    const lbl = labels[key] || key.toUpperCase();
+                    let cls = '';
+                    if (this.submitted) {
+                        if (key === q.answer) cls = 'correct';
+                        else if (key === picked && key !== q.answer) cls = 'wrong';
+                    } else if (key === picked) {
+                        cls = 'selected';
+                    }
+                    html += `
+                        <label class="option-label ${cls}" style="${this.submitted ? 'cursor:default;' : ''}">
+                            <input type="radio" name="q${this.currentIndex}" value="${key}"
+                                ${key === picked ? 'checked' : ''}
+                                ${this.submitted ? 'disabled' : ''}>
+                            <span><strong>${lbl}.</strong> ${escapeHtml(q.options[key])}</span>
+                        </label>
+                    `;
+                });
+                html += `</div>`;
+                if (this.submitted) {
+                    const correct = picked === q.answer;
+                    html += `
+                        <div class="summary-box">
+                            <h4>${correct ? '✅ Correct!' : picked ? '❌ Incorrect' : '⏭️ Skipped'}</h4>
+                            <p><strong>Correct Answer:</strong> ${labels[q.answer] || q.answer}</p>
+                            <p>${escapeHtml(q.explanation)}</p>
+                        </div>
+                    `;
+                }
+                html += `</div>`;
+                this.$question.innerHTML = html;
+                if (!this.submitted) {
+                    this.$question.querySelectorAll('.option-label').forEach((el, idx) => {
+                        const key = keys[idx];
+                        el.addEventListener('click', () => { this.answers[this.currentIndex] = key; this.render(); });
+                    });
+                }
+                this.updateNav();
+            },
+
+            prev() {
+                if (this.currentIndex > 0) { this.currentIndex--; this.render(); this.updateProgress(); }
+            },
+            next() {
+                if (this.currentIndex < this.questions.length - 1) { this.currentIndex++; this.render(); this.updateProgress(); }
+            },
+            updateNav() {
+                this.$prev.disabled = this.currentIndex === 0;
+                this.$next.style.display = this.currentIndex === this.questions.length - 1 ? 'none' : 'inline-block';
+                this.$submit.style.display = this.currentIndex === this.questions.length - 1 ? 'inline-block' : 'none';
+                this.$counter.textContent = `${this.currentIndex + 1} / ${this.questions.length}`;
+            },
+            updateProgress() {
+                const pct = ((this.currentIndex + 1) / this.questions.length) * 100;
+                this.$progress.style.width = pct + '%';
+            },
+            submit() {
+                this.submitted = true;
+                let correct = 0, answered = 0;
+                this.questions.forEach((q, i) => {
+                    if (this.answers[i]) answered++;
+                    if (this.answers[i] === q.answer) correct++;
+                });
+                const total = this.questions.length;
+                const percent = Math.round((correct / total) * 100);
+                this.$container.style.display = 'none';
+                this.$results.style.display = 'block';
+                document.getElementById('studyScore').textContent = percent + '%';
+                document.getElementById('studyScoreDetail').textContent = `${correct} / ${total} correct`;
+                document.getElementById('studyBreakdown').innerHTML = `
+                    <p style="color:#8892b0;"><strong style="color:#ccd6f6;">${this.$subject.options[this.$subject.selectedIndex].text}</strong>
+                    • ${this.$topic.value || 'General'} • ${total} questions</p>`;
+                this.updateUserStats(correct, total);
+            },
+            restart() {
+                this.answers = {}; this.submitted = false; this.currentIndex = 0;
+                this.$results.style.display = 'none'; this.$container.style.display = 'block';
+                this.render(); this.updateProgress();
+            },
+            updateUserStats(correct, total) {
+                const xp = Math.round((correct / total) * 50);
+                const cur = parseInt(localStorage.getItem('jambmax_xp') || '0');
+                localStorage.setItem('jambmax_xp', cur + xp);
+                const solved = parseInt(localStorage.getItem('jambmax_questions_solved') || '0');
+                localStorage.setItem('jambmax_questions_solved', solved + total);
+                const today = new Date().toDateString();
+                const last = localStorage.getItem('jambmax_last_study');
+                let streak = parseInt(localStorage.getItem('jambmax_streak') || '0');
+                if (last !== today) {
+                    const yest = new Date(); yest.setDate(yest.getDate() - 1);
+                    streak = (last === yest.toDateString()) ? streak + 1 : 1;
+                    localStorage.setItem('jambmax_streak', streak);
+                    localStorage.setItem('jambmax_last_study', today);
+                }
+                if (typeof jmApp !== 'undefined' && jmApp.updateStats) jmApp.updateStats();
+                showToast(`+${xp} XP earned!`);
+            }
+        };
+
+        // ─── UTILITIES ───
+        function escapeHtml(text) {
+            if (!text) return '';
+            const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
+        }
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            if (toast) { toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
+            else console.log('[Toast]', msg);
+        }
+
+        // ─── TABS ───
+        function initTabs() {
+            document.querySelectorAll('.study-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.study-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+                });
+            });
+        }
+
+        // ─── TEXTBOOKS TAB ───
+        function initTextbooks() {
+            const subjects = [
+                {key:'english', label:'English'},
+                {key:'mathematics', label:'Maths'},
+                {key:'physics', label:'Physics'},
+                {key:'chemistry', label:'Chemistry'},
+                {key:'biology', label:'Biology'},
+                {key:'government', label:'Govt'},
+                {key:'economics', label:'Econs'},
+                {key:'literature', label:'Lit'},
+                {key:'crs', label:'CRS'},
+                {key:'commerce', label:'Commerce'},
+                {key:'accounting', label:'Accounts'},
+                {key:'geography', label:'Geography'}
+            ];
+            const grid = document.getElementById('textbookSubjects');
+            subjects.forEach((s, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'subject-chip' + (i === 0 ? ' active' : '');
+                chip.textContent = s.label;
+                chip.dataset.subject = s.key;
+                chip.addEventListener('click', () => {
+                    document.querySelectorAll('#textbookSubjects .subject-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    renderTextbooks(s.key);
+                });
+                grid.appendChild(chip);
+            });
+            renderTextbooks('english');
+        }
+        function renderTextbooks(subject) {
+            const list = document.getElementById('textbookList');
+            const books = TEXTBOOKS[subject] || [];
+            if (books.length === 0) { list.innerHTML = '<p style="color:#8892b0;text-align:center;padding:2rem;">No textbooks listed for this subject yet.</p>'; return; }
+            list.innerHTML = books.map(b => `
+                <div class="textbook-card">
+                    <h4>${escapeHtml(b.title)}</h4>
+                    <p class="author">${escapeHtml(b.author)}</p>
+                    <span class="textbook-tag">${b.tag}</span>
+                </div>
+            `).join('');
+        }
+
+        // ─── NOVELS TAB ───
+        function initNovels() {
+            const grid = document.getElementById('literatureTexts');
+            grid.innerHTML = LITERATURE_TEXTS.map(n => `
+                <div class="novel-card">
+                    <div class="category">${n.category}</div>
+                    <h4>${escapeHtml(n.title)}</h4>
+                    <p class="author">${escapeHtml(n.author)}</p>
+                    <span class="type-tag">${n.type}</span>
+                </div>
+            `).join('');
+            const anth = document.getElementById('anthologyList');
+            anth.innerHTML = `
+                <h4 style="color:#64ffda;margin:1.5rem 0 0.75rem;">Anthologies</h4>
+                ${ANTHOLOGIES.map(a => `
+                    <div class="textbook-card">
+                        <h4>${escapeHtml(a.title)}</h4>
+                        <p class="author">${escapeHtml(a.author)} • ${escapeHtml(a.publisher)}</p>
+                        <span class="textbook-tag">Anthology</span>
+                    </div>
+                `).join('')}
+                <h4 style="color:#64ffda;margin:1.5rem 0 0.75rem;">Critical Texts</h4>
+                ${CRITICAL_TEXTS.map(c => `
+                    <div class="textbook-card">
+                        <h4>${escapeHtml(c.title)}</h4>
+                        <p class="author">${escapeHtml(c.author)} • ${escapeHtml(c.publisher)}</p>
+                        <span class="textbook-tag">Critical Text</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        // ─── SYLLABUS TAB ───
+        function initSyllabus() {
+            const subjects = [
+                {key:'english', label:'English'},
+                {key:'mathematics', label:'Maths'},
+                {key:'physics', label:'Physics'},
+                {key:'chemistry', label:'Chemistry'},
+                {key:'biology', label:'Biology'},
+                {key:'government', label:'Govt'},
+                {key:'economics', label:'Econs'},
+                {key:'literature', label:'Lit'},
+                {key:'crs', label:'CRS'}
+            ];
+            const grid = document.getElementById('syllabusSubjects');
+            subjects.forEach((s, i) => {
+                const chip = document.createElement('div');
+                chip.className = 'subject-chip' + (i === 0 ? ' active' : '');
+                chip.textContent = s.label;
+                chip.dataset.subject = s.key;
+                chip.addEventListener('click', () => {
+                    document.querySelectorAll('#syllabusSubjects .subject-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    renderSyllabus(s.key);
+                });
+                grid.appendChild(chip);
+            });
+            renderSyllabus('english');
+        }
+        function renderSyllabus(subject) {
+            const container = document.getElementById('syllabusContent');
+            const topics = SYLLABUS[subject] || [];
+            if (topics.length === 0) { container.innerHTML = '<p style="color:#8892b0;text-align:center;padding:2rem;">Syllabus topics not available for this subject yet.</p>'; return; }
+            container.innerHTML = `
+                <div class="summary-box">
+                    <h4>JAMB Syllabus Topics — ${subject.charAt(0).toUpperCase() + subject.slice(1)}</h4>
+                    <ul>
+                        ${topics.map(t => `<li>${escapeHtml(t)}</li>`).join('')}
+                    </ul>
+                </div>
+                <p style="color:#8892b0;font-size:0.85rem;margin-top:1rem;">
+                    💡 Select a topic from the dropdown in the Practice tab to target your study.
+                </p>
+            `;
+        }
+
+        // ─── BOOTSTRAP ───
+        document.addEventListener('DOMContentLoaded', () => {
+            initTabs();
+            initTextbooks();
+            initNovels();
+            initSyllabus();
+            practice.init();
+        });
+    })();
+    </script>
+
     <script src="../js/db.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/study.js"></script>
     <script src="../js/app.js"></script>
 </body>
 </html>

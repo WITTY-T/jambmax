@@ -7,6 +7,8 @@
     <meta name="theme-color" content="#0a192f">
     <link rel="manifest" href="../manifest.json">
     <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/exam.css">
+<base target="_blank">
 </head>
 <body>
     <div id="app">
@@ -79,12 +81,15 @@
                 <div class="page active" id="exam-page">
                     <div class="page-header">
                         <h1>Mock CBT Exam</h1>
-                        <p>Simulate the real JAMB experience</p>
+                        <p>Simulate the real JAMB experience — 2 hours, 4 subjects, 180 questions</p>
                     </div>
-                    
+
+                    <!-- SETUP SCREEN -->
                     <div id="examSetup">
                         <div class="card">
                             <h3>Exam Configuration</h3>
+                            <p style="color: #8892b0; margin-bottom: 1.5rem;">Select your 4 JAMB subjects. English is compulsory.</p>
+
                             <div class="exam-config">
                                 <div class="config-item">
                                     <label>Use of English (Compulsory)</label>
@@ -128,10 +133,22 @@
                                     </select>
                                 </div>
                             </div>
-                            <button class="btn btn-primary btn-lg" onclick="exam.start()">Start Exam</button>
+
+                            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(100,255,218,0.05); border-radius: 8px;">
+                                <p style="color: #8892b0; font-size: 0.9rem; margin: 0;">
+                                    📋 <strong style="color: #ccd6f6;">Exam Format:</strong> 60 English + 40 each for 3 subjects = 180 questions<br>
+                                    ⏱️ <strong style="color: #ccd6f6;">Duration:</strong> 2 hours (120 minutes)<br>
+                                    🎯 <strong style="color: #ccd6f6;">Scoring:</strong> 1 mark per question, max 400 points
+                                </p>
+                            </div>
+
+                            <button class="btn btn-primary btn-lg" onclick="exam.start()" style="margin-top: 1.5rem; width: 100%;">
+                                🚀 Start Exam
+                            </button>
                         </div>
                     </div>
-                    
+
+                    <!-- EXAM INTERFACE -->
                     <div id="examInterface" style="display: none;">
                         <div class="exam-header">
                             <div class="timer" id="examTimer">02:00:00</div>
@@ -140,7 +157,7 @@
                                 <span id="examProgress">1 / 60</span>
                             </div>
                         </div>
-                        
+
                         <div class="exam-layout">
                             <div class="exam-main">
                                 <div class="question-box" id="examQuestionBox"></div>
@@ -150,7 +167,7 @@
                                     <button class="btn btn-outline" onclick="exam.next()">Next →</button>
                                 </div>
                             </div>
-                            
+
                             <div class="exam-sidebar">
                                 <div class="nav-panel">
                                     <h4>Question Navigator</h4>
@@ -160,7 +177,8 @@
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- RESULTS SCREEN -->
                     <div id="examResults" style="display: none;">
                         <div class="results-card">
                             <h2>Exam Complete! 🎉</h2>
@@ -182,6 +200,7 @@
 
     <div class="toast" id="toast"></div>
 
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -196,7 +215,9 @@
         };
         firebase.initializeApp(firebaseConfig);
     </script>
-   <script src="../data/english.js"></script>
+
+    <!-- Data Files -->
+    <script src="../data/english.js"></script>
     <script src="../data/mathematics.js"></script>
     <script src="../data/physics.js"></script>
     <script src="../data/chemistry.js"></script>
@@ -205,10 +226,21 @@
     <script src="../data/economics.js"></script>
     <script src="../data/literature.js"></script>
     <script src="../data/crs.js"></script>
+
+    <!-- App Scripts -->
     <script src="../js/data-loader.js"></script>
     <script src="../js/db.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/study.js"></script>
+    <script src="../js/exam.js"></script>
     <script src="../js/app.js"></script>
+
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('../sw.js')
+                .then(reg => console.log('SW registered:', reg.scope))
+                .catch(err => console.error('SW failed:', err));
+        }
+    </script>
 </body>
 </html>
