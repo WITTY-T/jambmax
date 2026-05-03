@@ -1,7 +1,6 @@
 const payment = {
-    // Replace with your Paystack public key
-    PAYSTACK_KEY: 'pk_test_your_key_here',
-    FLUTTERWAVE_KEY: 'FLWPUBK_TEST-your_key_here-X',
+    get PAYSTACK_KEY() { return window.PAYSTACK_KEY || 'pk_test_your_key_here'; },
+    get FLUTTERWAVE_KEY() { return window.FLUTTERWAVE_KEY || 'FLWPUBK_TEST-your_key_here-X'; },
     
     plans: {
         weekly: { name: 'Weekly', price: 1000, duration: 7, code: 'PLN_weekly' },
@@ -219,3 +218,5 @@ const payment = {
         document.body.appendChild(modal);
     }
 };
+
+window.payment = payment;

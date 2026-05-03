@@ -481,17 +481,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCduP8roSRxqEiWGxWE6mJQuLI6--L8PYU",
-            authDomain: "jambmax.firebaseapp.com",
-            projectId: "jambmax",
-            storageBucket: "jambmax.firebasestorage.app",
-            messagingSenderId: "598048583687",
-            appId: "1:598048583687:web:51fd9a184c317a0043faa2"
-        };
-        firebase.initializeApp(firebaseConfig);
-    </script>
+    <script type="module" src="../js/firebase-config.js"></script>
 
     <script>
     (function() {
@@ -817,7 +807,7 @@
 
             start() {
                 const subject = this.$subject.value;
-                if (!subject) { showToast('Select a subject first'); return; }
+                if (!subject) { app.showToast('Select a subject first'); return; }
                 const count = parseInt(this.$count.value);
                 const topic = this.$topic.value || 'General';
                 this.questions = this.generateMockQuestions(subject, topic, count);
@@ -999,7 +989,7 @@
                     localStorage.setItem('jambmax_last_study', today);
                 }
                 if (typeof jmApp !== 'undefined' && jmApp.updateStats) jmApp.updateStats();
-                showToast(`+${xp} XP earned!`);
+                app.showToast(`+${xp} XP earned!`);
             }
         };
 
@@ -1008,7 +998,7 @@
             if (!text) return '';
             const d = document.createElement('div'); d.textContent = text; return d.innerHTML;
         }
-        function showToast(msg) {
+        function app.showToast(msg) {
             const toast = document.getElementById('toast');
             if (toast) { toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
             else console.log('[Toast]', msg);
@@ -1158,8 +1148,8 @@
     })();
     </script>
 
-    <script src="../js/db.js"></script>
-    <script src="../js/auth.js"></script>
-    <script src="../js/app.js"></script>
+    <script defer src="../js/db.js"></script>
+    <script defer src="../js/auth.js"></script>
+    <script defer src="../js/app.js"></script>
 </body>
 </html>

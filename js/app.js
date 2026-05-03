@@ -2,9 +2,9 @@
  * JAMB MAX - Main App Controller (v2)
  */
 
-const jmApp = {
+const app = {
     init() {
-        console.log('[jmApp] Initializing...');
+        console.log('[app] Initializing...');
 
         this.setupNavigation();
         this.updateStats();
@@ -13,7 +13,7 @@ const jmApp = {
             jmDB.init();
         }
 
-        console.log('[jmApp] Ready');
+        console.log('[app] Ready');
     },
 
     setupNavigation() {
@@ -64,6 +64,19 @@ const jmApp = {
         if (profileXP) profileXP.textContent = xp;
         if (profileStreak) profileStreak.textContent = streak;
         if (profileLevel) profileLevel.textContent = Math.floor(xp / 100) + 1;
+        
+        // Premium Badge Logic
+        this.updatePremiumBadge();
+    },
+    
+    async updatePremiumBadge() {
+        if (typeof payment === 'undefined') return;
+        const isPremium = await payment.checkPremiumStatus();
+        const userNameEl = document.getElementById('userName');
+        
+        if (isPremium && userNameEl && !userNameEl.innerHTML.includes('PRO')) {
+            userNameEl.innerHTML += ' <span style="background: var(--gold); color: var(--navy); font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; vertical-align: top; margin-left: 5px; font-weight: 800;">PRO</span>';
+        }
     },
 
     showToast(message, duration) {
@@ -90,12 +103,18 @@ const jmApp = {
     },
 
     upgrade() {
-        this.showToast('Premium coming soon!');
+        if (typeof payment !== 'undefined') {
+            payment.showPricingModal();
+        } else {
+            this.showToast('Premium coming soon!');
+        }
     }
 };
 
+window.app = app;
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() { jmApp.init(); });
+    document.addEventListener('DOMContentLoaded', function() { app.init(); });
 } else {
-    jmApp.init();
+    app.init();
 }

@@ -719,7 +719,7 @@
                     <li>Priority support</li>
                     <li>Flashcards & study planner</li>
                 </ul>
-                <button class="btn btn-primary btn-full" onclick="openAuthModal('signup')">Go Premium</button>
+                <button class="btn btn-primary btn-full" onclick="handleGoPremium()">Go Premium</button>
             </div>
         </div>
     </section>
@@ -776,30 +776,12 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-    <script>
-        // Firebase Config - Replace with your own
-        const firebaseConfig = {
-    apiKey: "AIzaSyCduP8roSRxqEiWGxWE6mJQuLI6--L8PYU",
-    authDomain: "jambmax.firebaseapp.com",
-    projectId: "jambmax",
-    storageBucket: "jambmax.firebasestorage.app",
-    messagingSenderId: "598048583687",
-    appId: "1:598048583687:web:51fd9a184c317a0043faa2"
-  };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module">
         let authMode = 'login';
         
-        function openAuthModal(mode) {
+        // Expose functions globally for onclick handlers
+        window.openAuthModal = function(mode) {
             authMode = mode;    
             const modal = document.getElementById('authModal');
             const title = document.getElementById('modalTitle');
@@ -826,89 +808,87 @@
             }
             
             modal.classList.add('active');
-        }
+        };
         
-        function closeAuthModal() {
+        window.closeAuthModal = function() {
             document.getElementById('authModal').classList.remove('active');
-        }
+        };
         
-        function toggleAuthMode() {
-            openAuthModal(authMode === 'login' ? 'signup' : 'login');
-        }
+        window.toggleAuthMode = function() {
+            window.openAuthModal(authMode === 'login' ? 'signup' : 'login');
+        };
         
-       function handleAuth(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    const name = document.getElementById('fullName').value;
-    
-    if (authMode === 'signup') {
-        // Validate name is provided
-        if (!name || name.trim() === '') {
-            showToast('Please enter your full name', 'error');
-            return;
-        }
+        window.handleGoPremium = function() {
+            if (auth.currentUser) {
+                window.location.href = 'Dashboard/dashboard.html?upgrade=true';
+            } else {
+                window.openAuthModal('signup');
+            }
+        };
         
-        auth.createUserWithEmailAndPassword(email, password)
-            .then((userCredential) => {
-                // Update profile with display name
-                return userCredential.user.updateProfile({
-                    displayName: name.trim()
-                });
-            })
-            .then(() => {
-                // Create user document in Firestore
-                return db.collection('users').doc(auth.currentUser.uid).set({
-                    name: name.trim(),
-                    email: email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    subjects: [],
-                    subscription: 'free',
-                    xp: 0,
-                    streak: 0
-                });
-            })
-            .then(() => {
-                showToast('Account created! Redirecting...', 'success');
-                setTimeout(() => window.location.href = '../Dashboard/dashboard.html', 1500);
-            })
-            .catch(err => {
-                console.error('Signup error:', err);
-                showToast(err.message, 'error');
-            });
-    } else {
-        auth.signInWithEmailAndPassword(email, password)
-            .then(() => {
-                showToast('Welcome back!', 'success');
-                setTimeout(() => window.location.href = '../Dashboard/dashboard.html', 1000);
-            })
-            .catch(err => {
-                console.error('Login error:', err);
-                showToast(err.message, 'error');
-            });
-    }
-}
+        window.handleAuth = function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('fullName').value;
+            
+            if (authMode === 'signup') {
+                if (!name || name.trim() === '') {
+                    if (window.app) window.app.showToast('Please enter your full name', 'error');
+                    return;
+                }
+                
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        return userCredential.user.updateProfile({ displayName: name.trim() });
+                    })
+                    .then(() => {
+                        return db.collection('users').doc(auth.currentUser.uid).set({
+                            name: name.trim(),
+                            email: email,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                            subjects: [],
+                            subscription: 'free',
+                            xp: 0,
+                            streak: 0
+                        });
+                    })
+                    .then(() => {
+                        if (window.app) window.app.showToast('Account created! Redirecting...', 'success');
+                        setTimeout(() => window.location.href = 'Dashboard/dashboard.html', 1500);
+                    })
+                    .catch(err => {
+                        console.error('Signup error:', err);
+                        if (window.app) window.app.showToast(err.message, 'error');
+                    });
+            } else {
+                auth.signInWithEmailAndPassword(email, password)
+                    .then(() => {
+                        if (window.app) window.app.showToast('Welcome back!', 'success');
+                        setTimeout(() => window.location.href = 'Dashboard/dashboard.html', 1000);
+                    })
+                    .catch(err => {
+                        console.error('Login error:', err);
+                        if (window.app) window.app.showToast(err.message, 'error');
+                    });
+            }
+        };
         
-        function googleSignIn() {
+        window.googleSignIn = function() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
                 .then(() => {
-                    showToast('Signed in with Google!', 'success');
-                    setTimeout(() => window.location.href = '../Dashboard/dashboard.html', 1000);
+                    if (window.app) window.app.showToast('Signed in with Google!', 'success');
+                    setTimeout(() => window.location.href = 'Dashboard/dashboard.html', 1000);
                 })
-                .catch(err => showToast(err.message, 'error'));
-        }
-        
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type} show`;
-            setTimeout(() => toast.classList.remove('show'), 4000);
-        }
+                .catch(err => {
+                    if (window.app) window.app.showToast(err.message, 'error');
+                });
+        };
         
         // Close modal on outside click
         document.getElementById('authModal').addEventListener('click', (e) => {
-            if (e.target.id === 'authModal') closeAuthModal();
+            if (e.target.id === 'authModal') window.closeAuthModal();
         });
         
         // Check auth state

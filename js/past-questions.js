@@ -349,6 +349,21 @@ const pastQuestions = {
             return;
         }
 
+        // Premium Check
+        if (typeof payment !== 'undefined') {
+            const isPremium = await payment.checkPremiumStatus();
+            if (!isPremium) {
+                const freeYears = ['2018', '2019', '2020', ''];
+                if (!freeYears.includes(year)) {
+                    if (typeof app !== 'undefined') {
+                        app.showToast('🔒 Free users can only access 2018-2020. Upgrade to Premium to unlock all years!');
+                        app.upgrade();
+                    }
+                    return;
+                }
+            }
+        }
+
         this.sessionMeta = { subject, year, count, subjectName: this.SUBJECTS[subject] };
 
         // Show loading state

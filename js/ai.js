@@ -1,15 +1,25 @@
 const ai = {
     messages: [],
-    apiKey: "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", // Set your OpenAI API key here or in settings
+    
+    get apiKey() { return window.OPENAI_API_KEY || ''; },
     
     init() {
         this.updateStatus();
         window.addEventListener('online', () => this.updateStatus());
         window.addEventListener('offline', () => this.updateStatus());
+        
+        const history = localStorage.getItem('ai_chat_history');
+        if (history) {
+            this.messages = JSON.parse(history);
+            this.renderHistory();
+        } else {
+            this.newChat();
+        }
     },
     
     updateStatus() {
         const status = document.getElementById('aiStatus');
+        if (!status) return;
         const dot = status.querySelector('.status-dot');
         
         if (navigator.onLine && this.apiKey) {
@@ -22,8 +32,12 @@ const ai = {
     },
     
     newChat() {
-        this.messages = [];
+        this.messages = [{
+            role: 'system',
+            content: this.getContext()
+        }];
         const container = document.getElementById('chatMessages');
+        if (!container) return;
         container.innerHTML = `
             <div class="message ai-message">
                 <div class="message-avatar">🤖</div>
@@ -32,6 +46,48 @@ const ai = {
                 </div>
             </div>
         `;
+        this.saveHistory();
+    },
+    
+    getContext() {
+        let context = 'You are a JAMB tutor for Nigerian secondary school students. Be concise, encouraging, and explain concepts clearly. Use examples where helpful. Use markdown for formatting, and wrap mathematical equations in $ for inline and $$ for block equations.';
+        
+        try {
+            const user = JSON.parse(localStorage.getItem('jambmax_user') || '{}');
+            if (user.name) context += `\nThe student's name is ${user.name}. Address them by name occasionally.`;
+            
+            const stats = JSON.parse(localStorage.getItem('jambmax_stats') || '{}');
+            if (stats.weakSubjects && stats.weakSubjects.length > 0) {
+                context += `\nThe student is currently weak in: ${stats.weakSubjects.join(', ')}. Provide extra encouragement and simple examples when discussing these subjects.`;
+            }
+        } catch(e) {}
+        
+        return context;
+    },
+    
+    saveHistory() {
+        localStorage.setItem('ai_chat_history', JSON.stringify(this.messages));
+    },
+    
+    renderHistory() {
+        const container = document.getElementById('chatMessages');
+        if (!container) return;
+        
+        let html = `
+            <div class="message ai-message">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    Welcome back! We can continue our previous conversation.
+                </div>
+            </div>
+        `;
+        container.innerHTML = html;
+        
+        this.messages.forEach(msg => {
+            if(msg.role !== 'system') {
+                this.addMessageDOM(msg.content, msg.role === 'user' ? 'user' : 'ai');
+            }
+        });
     },
     
     async send() {
@@ -39,41 +95,65 @@ const ai = {
         const message = input.value.trim();
         if (!message) return;
         
+        // Premium Check: Limit free users to 5 messages/day
+        const today = new Date().toDateString();
+        const usageKey = 'jambmax_ai_usage_' + today;
+        let usage = parseInt(localStorage.getItem(usageKey) || '0');
+        
+        if (typeof payment !== 'undefined') {
+            const isPremium = await payment.checkPremiumStatus();
+            if (!isPremium && usage >= 5) {
+                if (typeof app !== 'undefined') {
+                    app.showToast('🔒 You have reached your 5 free AI messages for today. Upgrade to Premium for unlimited access!');
+                    app.upgrade();
+                }
+                return;
+            }
+        }
+        
+        // Increment usage
+        localStorage.setItem(usageKey, (usage + 1).toString());
+        
         input.value = '';
-        this.addMessage(message, 'user');
+        this.addMessageDOM(message, 'user');
         
-        // Show typing indicator
+        this.messages.push({ role: 'user', content: message });
+        this.saveHistory();
+        
         const typingId = this.addTyping();
-        
         let response;
         
         if (navigator.onLine && this.apiKey) {
             try {
                 response = await this.callGPT(message);
             } catch (err) {
+                console.error(err);
                 response = this.getRuleBasedResponse(message);
             }
         } else {
-            // Simulate delay for realism
             await new Promise(r => setTimeout(r, 800));
             response = this.getRuleBasedResponse(message);
         }
         
         this.removeTyping(typingId);
-        this.addMessage(response, 'ai');
+        this.addMessageDOM(response, 'ai');
         
-        // Save to history
-        this.messages.push({ role: 'user', content: message });
         this.messages.push({ role: 'assistant', content: response });
+        this.saveHistory();
     },
     
     ask(text) {
-        document.getElementById('chatInput').value = text;
-        this.send();
+        const input = document.getElementById('chatInput');
+        if(input) {
+            input.value = text;
+            this.send();
+        }
     },
     
-    addMessage(text, sender) {
+    addMessageDOM(text, sender) {
         const container = document.getElementById('chatMessages');
+        if (!container) return;
+        
         const div = document.createElement('div');
         div.className = `message ${sender}-message`;
         div.innerHTML = `
@@ -81,11 +161,18 @@ const ai = {
             <div class="message-content">${this.formatText(text)}</div>
         `;
         container.appendChild(div);
+        
+        if (window.MathJax) {
+            MathJax.typesetPromise([div]).catch((err) => console.log('MathJax error: ', err.message));
+        }
+        
         container.scrollTop = container.scrollHeight;
     },
     
     addTyping() {
         const container = document.getElementById('chatMessages');
+        if (!container) return null;
+        
         const id = 'typing-' + Date.now();
         const div = document.createElement('div');
         div.id = id;
@@ -100,11 +187,15 @@ const ai = {
     },
     
     removeTyping(id) {
+        if (!id) return;
         const el = document.getElementById(id);
         if (el) el.remove();
     },
     
     formatText(text) {
+        if (window.marked) {
+            return marked.parse(text);
+        }
         return text
             .replace(/\n/g, '<br>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -112,6 +203,10 @@ const ai = {
     },
     
     async callGPT(message) {
+        if (this.messages.length === 0 || this.messages[0].role !== 'system') {
+            this.messages.unshift({ role: 'system', content: this.getContext() });
+        }
+        
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -120,18 +215,15 @@ const ai = {
             },
             body: JSON.stringify({
                 model: 'gpt-4',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are a JAMB tutor for Nigerian secondary school students. Be concise, encouraging, and explain concepts clearly. Use examples where helpful.'
-                    },
-                    ...this.messages.slice(-6),
-                    { role: 'user', content: message }
-                ],
-                max_tokens: 500,
+                messages: this.messages,
+                max_tokens: 800,
                 temperature: 0.7
             })
         });
+        
+        if (!response.ok) {
+            throw new Error(`OpenAI API Error: ${response.statusText}`);
+        }
         
         const data = await response.json();
         return data.choices[0].message.content;
@@ -140,51 +232,41 @@ const ai = {
     getRuleBasedResponse(message) {
         const lower = message.toLowerCase();
         
-        // Math patterns
         if (lower.includes('solve') || lower.includes('calculate') || lower.includes('find')) {
-            if (lower.includes('log') || lower.includes('derivative') || lower.includes('integral')) {
-                return "I'd be happy to help with that math problem! Since I'm in offline mode, here's a general approach:<br><br>1. Identify the type of problem<br>2. Recall the relevant formula or rule<br>3. Substitute the given values<br>4. Solve step by step<br><br>For this specific problem, please connect to the internet for a detailed solution, or check your textbook for similar examples.";
-            }
-            if (lower.includes('equation') || lower.includes('x') || lower.includes('y')) {
-                return "For solving equations:<br><br>1. Simplify both sides<br>2. Collect like terms<br>3. Isolate the variable<br>4. Check your answer by substitution<br><br>Would you like me to explain a specific type of equation?";
-            }
+            return "I'd be happy to help with that math problem! Since I'm in offline mode, here's a general approach:\n\n1. Identify the type of problem\n2. Recall the relevant formula or rule\n3. Substitute the given values\n4. Solve step by step\n\nPlease connect to the internet for a detailed solution.";
         }
         
-        // Science patterns
         if (lower.includes('photosynthesis')) {
-            return "**Photosynthesis** is the process by which green plants use sunlight, water, and carbon dioxide to create oxygen and energy in the form of sugar.<br><br>**Equation:**<br>6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂<br><br>**Key points for JAMB:**<br>• Occurs in the chloroplasts<br>• Light reaction and dark reaction (Calvin cycle)<br>• Chlorophyll absorbs light energy<br>• Products: glucose and oxygen";
+            return "**Photosynthesis** is the process by which green plants use sunlight, water, and carbon dioxide to create oxygen and energy in the form of sugar.\n\n**Equation:**\n$$6CO_2 + 6H_2O + light \\rightarrow C_6H_{12}O_6 + 6O_2$$";
         }
         
-        if (lower.includes('cell')) {
-            return "The **cell** is the basic unit of life. Key structures to remember for JAMB:<br><br>• **Nucleus** - controls cell activities<br>• **Mitochondria** - power house, produces ATP<br>• **Ribosomes** - protein synthesis<br>• **Golgi body** - packaging and distribution<br>• **Cell membrane** - selective permeability<br><br>Plant cells also have cell walls and chloroplasts!";
+        if (lower.includes('quiz') || lower.includes('questions')) {
+            if (window.JAMB_DATA && typeof JAMB_DATA.getQuestions === 'function') {
+                const subjects = ['english', 'mathematics', 'physics', 'chemistry', 'biology', 'government', 'economics'];
+                const subject = subjects.find(s => lower.includes(s)) || 'english';
+                const qs = JAMB_DATA.getQuestions({ subject, count: 5 });
+                
+                if (qs && qs.length > 0) {
+                    let response = `Here's a quick **${subject.toUpperCase()}** quiz for you:\n\n`;
+                    qs.forEach((q, i) => {
+                        response += `**${i + 1}. ${q.question}**\n`;
+                        response += `- A. ${q.options.A}\n- B. ${q.options.B}\n- C. ${q.options.C}\n- D. ${q.options.D}\n\n`;
+                    });
+                    response += "The correct answers are: " + qs.map(q => q.answer).join(', ');
+                    return response;
+                }
+            }
+            return "I can generate quizzes for you! But I need to load the question bank first. Try again when fully loaded.";
         }
         
-        // Literature
-        if (lower.includes('things fall apart') || lower.includes('achebe')) {
-            return "**Things Fall Apart** by Chinua Achebe (1958):<br><br>**Key Themes:**<br>• Clash of cultures (Igbo vs. Colonial)<br>• Tradition vs. Change<br>• Fate and Free will<br>• Masculinity and Pride<br><br>**Okonkwo** - Tragic hero, fears weakness, driven by pride<br>**Nwoye** - Converts to Christianity, represents change<br><br>This is Africa's most widely read novel and a JAMB favorite!";
-        }
-        
-        // Government
-        if (lower.includes('government') || lower.includes('constitution') || lower.includes('federalism')) {
-            return "For JAMB Government, remember:<br><br>• **Federalism** - Division of powers between central and state governments<br>• **1999 Constitution** - Presidential system, 36 states + FCT<br>• **Separation of Powers** - Executive, Legislative, Judicial<br>• **Citizenship** - By birth, registration, or naturalization<br><br>Would you like me to explain any specific topic in detail?";
-        }
-        
-        // Quiz generation
-        if (lower.includes('quiz') || lower.includes('questions') || lower.includes('test me')) {
-            const subjects = ['english', 'mathematics', 'physics', 'chemistry', 'biology', 'government', 'economics'];
-            const subject = subjects.find(s => lower.includes(s)) || 'general';
-            const qs = JAMB_DATA.getQuestions({ subject, count: 5 });
-            
-            let response = `Here's a quick **${subject.toUpperCase()}** quiz for you:<br><br>`;
-            qs.forEach((q, i) => {
-                response += `${i + 1}. ${q.question}<br>`;
-                response += `A. ${q.options.A} B. ${q.options.B} C. ${q.options.C} D. ${q.options.D}<br><br>`;
-            });
-            response += "Take your time and check your answers! The correct answers are: " + qs.map(q => q.answer).join(', ');
-            return response;
-        }
-        
-        // Default
-        return "That's a great question! I'm currently in offline mode with preloaded JAMB content. I can help you with:<br><br>• Past question explanations<br>• Concept summaries (Photosynthesis, Cell Biology, etc.)<br>• Literature analysis (Things Fall Apart, etc.)<br>• Government topics<br>• Quick quizzes<br><br>Connect to the internet and add your OpenAI API key for full AI tutoring capabilities!";
+        return "That's a great question! I'm currently in offline mode with preloaded JAMB content. Connect to the internet for full AI tutoring capabilities!";
     }
 };
+
+window.ai = ai;
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('ai-page')) {
+        ai.init();
+    }
+});
