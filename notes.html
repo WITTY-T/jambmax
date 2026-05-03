@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Study Notes - JAMB MAX</title>
-    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/style.css>
     <style>
         /* Study Module Styles */
         .study-layout {
@@ -89,7 +89,7 @@
         }
 
         .topic-item.completed::after {
-            content: "✓";
+            content: '✓';
             margin-left: auto;
             font-size: 0.8rem;
         }
@@ -613,7 +613,7 @@ function saveAllNotes() {
     localStorage.setItem(key + "_examples", document.getElementById("examples").innerHTML);
     localStorage.setItem(key + "_practice", document.getElementById("practice").innerHTML);
 
-    showToast("Notes saved! 💾", "success");
+    app.showToast("Notes saved! 💾", "success");
 
     // Add XP
     addXP(10);
@@ -626,7 +626,7 @@ function toggleComplete() {
 
     if (!isCompleted) {
         localStorage.setItem(key + "_completed", "true");
-        showToast("Topic completed! 🎉 +50 XP", "success");
+        app.showToast("Topic completed! 🎉 +50 XP", "success");
         addXP(50);
     } else {
         localStorage.setItem(key + "_completed", "false");
@@ -645,7 +645,7 @@ function addXP(amount) {
 }
 
 // Show toast
-function showToast(message, type) {
+function app.showToast(message, type) {
     const toast = document.getElementById("toast");
     toast.textContent = message;
     toast.className = `toast ${type} show`;
