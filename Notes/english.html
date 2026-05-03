@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JAMB Use of English - Study Notes</title>
+    <style>
+        :root {
+            --primary: #1a5f2a;
+            --primary-light: #e8f5e9;
+            --accent: #f4a261;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #2d3436;
+            --text-light: #636e72;
+            --border: #dfe6e9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, #2d7a3e 100%);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+
+        .header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+        .header p { opacity: 0.9; font-size: 0.95rem; }
+        .header .badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #2d3436;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .progress-container {
+            background: white;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 115px;
+            z-index: 99;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), #2d7a3e);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 0.4rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem 3rem;
+        }
+
+        .section {
+            margin-bottom: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+
+        .section:hover { box-shadow: var(--shadow-hover); }
+
+        .section-header {
+            background: var(--primary-light);
+            padding: 1rem 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary);
+            transition: background 0.2s;
+        }
+
+        .section-header:hover { background: #d4edda; }
+
+        .section-header h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-header .icon { font-size: 1.2rem; }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--primary);
+            cursor: pointer;
+            transition: transform 0.3s;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .toggle-btn:hover { background: rgba(26, 95, 42, 0.1); }
+        .toggle-btn.rotated { transform: rotate(180deg); }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+
+        .section-content.open { max-height: 2000px; }
+
+        .topic-card {
+            padding: 1.2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .topic-card:last-child { border-bottom: none; }
+
+        .topic-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .topic-number {
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .topic-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .field-group { margin-bottom: 0.8rem; }
+
+        .field-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .field-input {
+            width: 100%;
+            min-height: 60px;
+            padding: 0.7rem;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            color: var(--text);
+            background: #fafbfc;
+            resize: vertical;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+
+        .field-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            border-style: solid;
+            background: white;
+        }
+
+        .field-input::placeholder {
+            color: #b2bec3;
+            font-style: italic;
+        }
+
+        .field-input.bullet-input { min-height: 80px; }
+
+        .complete-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.6rem;
+            padding: 0.4rem 0;
+        }
+
+        .complete-check input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .complete-check label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        .topic-card.completed .topic-title {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+
+        .topic-card.completed { background: #f0f7f1; }
+
+        .actions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 1000;
+        }
+
+        .fab {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .fab:hover { transform: scale(1.1); }
+        .fab-primary { background: var(--primary); color: white; }
+        .fab-secondary { background: white; color: var(--primary); border: 2px solid var(--primary); }
+
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.4rem; }
+            .topic-card { padding: 1rem; }
+            .actions { bottom: 15px; right: 15px; }
+        }
+
+        @media print {
+            .actions, .progress-container, .toast { display: none; }
+            .section-content { max-height: none !important; }
+            .field-input { border: 1px solid #ccc; min-height: auto; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <header class="header">
+        <h1>📚 Use of English</h1>
+        <p>JAMB UTME Complete Study Notes</p>
+        <span class="badge">COMPULSORY SUBJECT</span>
+    </header>
+
+    <div class="progress-container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">0% Complete — Start filling in your notes!</div>
+    </div>
+
+    <main class="container">
+
+        <div class="section" data-section="1">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2><span class="icon">📖</span> Section A: Comprehension & Summary</h2>
+                <button class="toggle-btn">▼</button>
+            </div>
+            <div class="section-content">
+
+                <div class="topic-card" data-topic="1.1">
+                    <div class="topic-header">
+                        <span class="topic-number">1</span>
+                        <span class="topic-title">Comprehension Passages</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Main idea identification&#10;• Supporting details&#10;• Inference techniques&#10;• Context clues for vocabulary..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="Common question types and how JAMB frames them..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="Your personal strategies for tackling comprehension questions..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-1.1" onchange="updateProgress()">
+                        <label for="check-1.1">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="1.2">
+                    <div class="topic-header">
+                        <span class="topic-number">2</span>
+                        <span class="topic-title">Summary Writing</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Condensing information&#10;• Identifying key points&#10;• Paraphrasing techniques&#10;• Word count management..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="How summary questions appear in JAMB..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="Your strategies for summary questions..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-1.2" onchange="updateProgress()">
+                        <label for="check-1.2">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="1.3">
+                    <div class="topic-header">
+                        <span class="topic-number">3</span>
+                        <span class="topic-title">Reading for Main Ideas</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Topic sentences&#10;• Thesis statements&#10;• Identifying central arguments..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-1.3" onchange="updateProgress()">
+                        <label for="check-1.3">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="1.4">
+                    <div class="topic-header">
+                        <span class="topic-number">4</span>
+                        <span class="topic-title">Reading for Details</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Scanning techniques&#10;• Specific information retrieval&#10;• Fact vs opinion..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-1.4" onchange="updateProgress()">
+                        <label for="check-1.4">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="1.5">
+                    <div class="topic-header">
+                        <span class="topic-number">5</span>
+                        <span class="topic-title">Inferences & Deductions</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Reading between the lines&#10;• Drawing logical conclusions&#10;• Implied meaning vs stated meaning..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-1.5" onchange="updateProgress()">
+                        <label for="check-1.5">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="1.6">
+                    <div class="topic-header">
+                        <span class="topic-number">6</span>
+                        <span class="topic-title">Vocabulary from Context</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Context clues (definition, example, contrast, inference)&#10;• Word roots, prefixes, suffixes&#10;• Synonyms and antonyms in context..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-1.6" onchange="updateProgress()">
+                        <label for="check-1.6">Mark as completed</label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="section" data-section="2">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2><span class="icon">🔤</span> Section B: Lexis & Structure</h2>
+                <button class="toggle-btn">▼</button>
+            </div>
+            <div class="section-content">
+
+                <div class="topic-card" data-topic="2.1">
+                    <div class="topic-header">
+                        <span class="topic-number">1</span>
+                        <span class="topic-title">Synonyms, Antonyms & Homonyms</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Words with similar meanings&#10;• Words with opposite meanings&#10;• Words that sound alike but differ in meaning/spelling..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-2.1" onchange="updateProgress()">
+                        <label for="check-2.1">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="2.2">
+                    <div class="topic-header">
+                        <span class="topic-number">2</span>
+                        <span class="topic-title">Clause & Sentence Patterns</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Independent vs dependent clauses&#10;• Simple, compound, complex, compound-complex sentences&#10;• Sentence fragments and run-ons..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-2.2" onchange="updateProgress()">
+                        <label for="check-2.2">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="2.3">
+                    <div class="topic-header">
+                        <span class="topic-number">3</span>
+                        <span class="topic-title">Word Classes (Parts of Speech)</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Nouns, pronouns, verbs, adjectives, adverbs&#10;• Prepositions, conjunctions, interjections&#10;• Functions of each word class in sentences..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-2.3" onchange="updateProgress()">
+                        <label for="check-2.3">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="2.4">
+                    <div class="topic-header">
+                        <span class="topic-number">4</span>
+                        <span class="topic-title">Word Formation (Prefixes & Suffixes)</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Common prefixes (un-, re-, dis-, pre-, mis-)&#10;• Common suffixes (-tion, -ment, -ness, -ful, -less)&#10;• How affixes change word meaning and class..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-2.4" onchange="updateProgress()">
+                        <label for="check-2.4">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="2.5">
+                    <div class="topic-header">
+                        <span class="topic-number">5</span>
+                        <span class="topic-title">Figures of Speech</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Simile, metaphor, personification&#10;• Hyperbole, understatement, irony&#10;• Alliteration, assonance, onomatopoeia&#10;• Pun, oxymoron, paradox..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-2.5" onchange="updateProgress()">
+                        <label for="check-2.5">Mark as completed</label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="section" data-section="3">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2><span class="icon">🎙️</span> Section C: Oral Forms</h2>
+                <button class="toggle-btn">▼</button>
+            </div>
+            <div class="section-content">
+
+                <div class="topic-card" data-topic="3.1">
+                    <div class="topic-header">
+                        <span class="topic-number">1</span>
+                        <span class="topic-title">Vowels, Consonants & Rhymes</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Pure vowels and diphthongs&#10;• Consonant clusters&#10;• Rhyme schemes in poetry&#10;• Perfect, imperfect, and eye rhymes..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-3.1" onchange="updateProgress()">
+                        <label for="check-3.1">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="3.2">
+                    <div class="topic-header">
+                        <span class="topic-number">2</span>
+                        <span class="topic-title">Word Stress</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Syllable identification&#10;• Primary and secondary stress&#10;• Stress patterns in nouns vs verbs&#10;• Stress in compound words..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-3.2" onchange="updateProgress()">
+                        <label for="check-3.2">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="3.3">
+                    <div class="topic-header">
+                        <span class="topic-number">3</span>
+                        <span class="topic-title">Sentence Stress & Intonation</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Content words vs function words&#10;• Rising and falling intonation&#10;• Intonation in statements, questions, commands&#10;• Tone groups and pauses..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-3.3" onchange="updateProgress()">
+                        <label for="check-3.3">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="3.4">
+                    <div class="topic-header">
+                        <span class="topic-number">4</span>
+                        <span class="topic-title">Emphatic Stress</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Contrastive stress&#10;• Emphatic stress for emphasis&#10;• Identifying the emphasized word in a sentence&#10;• How stress changes meaning..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-3.4" onchange="updateProgress()">
+                        <label for="check-3.4">Mark as completed</label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="section" data-section="4">
+            <div class="section-header" onclick="toggleSection(this)">
+                <h2><span class="icon">📕</span> Section D: JAMB Novel</h2>
+                <button class="toggle-btn">▼</button>
+            </div>
+            <div class="section-content">
+
+                <div class="topic-card" data-topic="4.1">
+                    <div class="topic-header">
+                        <span class="topic-number">1</span>
+                        <span class="topic-title">The Lekki Headmaster - Plot Summary</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Main plot points&#10;• Subplots&#10;• Chronological order of events&#10;• Climax and resolution..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-4.1" onchange="updateProgress()">
+                        <label for="check-4.1">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="4.2">
+                    <div class="topic-header">
+                        <span class="topic-number">2</span>
+                        <span class="topic-title">Characters & Characterization</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Major characters and their roles&#10;• Minor characters&#10;• Character traits and development&#10;• Relationships between characters..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-4.2" onchange="updateProgress()">
+                        <label for="check-4.2">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="4.3">
+                    <div class="topic-header">
+                        <span class="topic-number">3</span>
+                        <span class="topic-title">Themes & Moral Lessons</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Central themes&#10;• Sub-themes&#10;• Moral lessons&#10;• Relevance to contemporary Nigerian society..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-4.3" onchange="updateProgress()">
+                        <label for="check-4.3">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="4.4">
+                    <div class="topic-header">
+                        <span class="topic-number">4</span>
+                        <span class="topic-title">Literary Devices & Style</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Narrative technique&#10;• Point of view&#10;• Setting and atmosphere&#10;• Language and diction&#10;• Use of dialogue..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-4.4" onchange="updateProgress()">
+                        <label for="check-4.4">Mark as completed</label>
+                    </div>
+                </div>
+
+                <div class="topic-card" data-topic="4.5">
+                    <div class="topic-header">
+                        <span class="topic-number">5</span>
+                        <span class="topic-title">Key Quotations & Page References</span>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">📝 Key Concepts</div>
+                        <textarea class="field-input bullet-input" placeholder="• Important quotes from each character&#10;• Significant passages&#10;• Page numbers for quick reference..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">🎯 JAMB Question Patterns</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="field-group">
+                        <div class="field-label">💡 Pro Tips / Shortcuts</div>
+                        <textarea class="field-input" placeholder="..."></textarea>
+                    </div>
+                    <div class="complete-check">
+                        <input type="checkbox" id="check-4.5" onchange="updateProgress()">
+                        <label for="check-4.5">Mark as completed</label>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <div class="actions">
+        <button class="fab fab-secondary" onclick="expandAll()" title="Expand All">📂</button>
+        <button class="fab fab-secondary" onclick="collapseAll()" title="Collapse All">📁</button>
+        <button class="fab fab-primary" onclick="saveNotes()" title="Save Progress">💾</button>
+    </div>
+
+    <div class="toast" id="toast">✅ Progress saved!</div>
+
+    <script>
+        function toggleSection(header) {
+            const content = header.nextElementSibling;
+            const btn = header.querySelector('.toggle-btn');
+            content.classList.toggle('open');
+            btn.classList.toggle('rotated');
+        }
+
+        function expandAll() {
+            document.querySelectorAll('.section-content').forEach(c => c.classList.add('open'));
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.add('rotated'));
+        }
+
+        function collapseAll() {
+            document.querySelectorAll('.section-content').forEach(c => c.classList.remove('open'));
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('rotated'));
+        }
+
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+            const percent = Math.round((checked.length / checkboxes.length) * 100);
+
+            document.getElementById('progressFill').style.width = percent + '%';
+            document.getElementById('progressText').textContent = percent + '% Complete' + 
+                (percent === 100 ? ' — You\'re ready for JAMB! 🎉' : ' — Keep going!');
+
+            checkboxes.forEach(cb => {
+                const card = cb.closest('.topic-card');
+                if (cb.checked) card.classList.add('completed');
+                else card.classList.remove('completed');
+            });
+
+            saveToStorage();
+        }
+
+        function saveToStorage() {
+            const data = {};
+            document.querySelectorAll('.field-input').forEach((input, i) => {
+                data['text-' + i] = input.value;
+            });
+            document.querySelectorAll('input[type="checkbox"]').forEach((cb, i) => {
+                data['check-' + i] = cb.checked;
+            });
+            localStorage.setItem('jamb-english-notes', JSON.stringify(data));
+        }
+
+        function loadFromStorage() {
+            const saved = localStorage.getItem('jamb-english-notes');
+            if (!saved) return;
+
+            const data = JSON.parse(saved);
+            document.querySelectorAll('.field-input').forEach((input, i) => {
+                if (data['text-' + i]) input.value = data['text-' + i];
+            });
+            document.querySelectorAll('input[type="checkbox"]').forEach((cb, i) => {
+                if (data['check-' + i]) cb.checked = data['check-' + i];
+            });
+            updateProgress();
+        }
+
+        function saveNotes() {
+            saveToStorage();
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        document.querySelectorAll('.field-input').forEach(input => {
+            input.addEventListener('input', saveToStorage);
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            document.querySelector('.section-content').classList.add('open');
+            document.querySelector('.toggle-btn').classList.add('rotated');
+        });
+    </script>
+</body>
+</html>
